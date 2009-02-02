@@ -42,6 +42,9 @@ our @EXPORT_OK = qw{ fetch_glob stash delete_glob };
 our %EXPORT_TAGS = (all => [ @EXPORT_OK ]);
 
 
+## no critic (ProhibitSubroutinePrototypes)
+## no critic (RequireArgUnpacking)
+
 # Returns a reference to the glob
 sub fetch_glob ($) {
     my ($name) = @_;
@@ -63,7 +66,6 @@ sub stash ($) {
 
 
 # Deletes a symbol in symbol table
-use YAML ();
 sub delete_glob ($;@) {
     my ($name, @slots) = @_;
 
