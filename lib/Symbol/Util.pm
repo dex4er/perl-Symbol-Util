@@ -8,12 +8,14 @@ Symbol::Util - Additional utils for Perl symbols manipulation
 
 =head1 SYNOPSIS
 
-  package Symbol::Util ':all';
+  use Symbol::Util ':all';
 
-  print ${ *{ fetch_glob("$class\::VERSION") } };
-  *{ fetch_glob("foo") } = sub { "this is foo" };
+  my $caller = caller;
+  *{ fetch_glob("${caller}::foo") } = sub { "this is foo" };
 
   print join "\n", keys %{ Symbol::stash("main") };
+
+  delete_glob("${caller}::foo", "CODE");
 
 =head1 DESCRIPTION
 
@@ -38,7 +40,7 @@ use Symbol ();
 
 # Export
 use Exporter ();
-*import = \&Exporter::import;
+BEGIN { *import = \&Exporter::import; };
 our @EXPORT_OK = qw{ fetch_glob stash };
 our %EXPORT_TAGS = (all => [ @EXPORT_OK ]);
 
@@ -99,11 +101,15 @@ Returns a reference to the glob for the specified symbol name.  If the
 symbol does not already exists it will be created.  If the symbol name is
 unqualified it will be looked up in the calling package.
 
+This function is taken from Kurila, a dialect of Perl.
+
 =item stash( I<name> : Str ) : HashRef
 
 Returns a refernce to the stash for the specified name.  If the stash does not
 already exists it will be created.  The name of the stash does not include the
 C<::> at the end.
+
+This function is taken from Kurila, a dialect of Perl.
 
 =back
 
