@@ -1,0 +1,49 @@
+This file contains message digests of all files listed in MANIFEST,
+signed via the Module::Signature module, version 0.55.
+
+To verify the content in this distribution, first make sure you have
+Module::Signature installed, then type:
+
+    % cpansign -v
+
+It will check each file's integrity, as well as the signature's
+validity.  If "==> Signature verified OK! <==" is not displayed,
+the distribution may already have been compromised, and you should
+not run its Makefile.PL or Build.PL.
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+SHA1 aa8b4621e6805812b30d542122566e8fc347f8e6 Build.PL
+SHA1 2966bae151954975d0b0edbef394e203e7abb33a Changes
+SHA1 752168fd36cc5334ab39b27e478f4997c296ec25 LICENSE
+SHA1 b056fdf94a902e64decd08543afae471c9b6f8d8 MANIFEST
+SHA1 7d9037725a8f8c9c65eff1e091819c215f55c650 MANIFEST.SKIP
+SHA1 89ae537ca44ace75cc1db183f17610cc1eb0d1d4 META.yml
+SHA1 2c5e663f544b3a1bfa0c3e847a99b257797583be Makefile.PL
+SHA1 3559583239c5a156d6091f7d68c661abb9ee8f59 README
+SHA1 01bd53ec0aa49f117e2efcec0eba6a6e79dddbcd eg/delete_glob.pl
+SHA1 7955244c61f79263f5a0d7f23358364a363cd741 lib/Symbol/Util.pm
+SHA1 9703fbc5fac573a3b94a1e9b06c9f5eb1c779735 t/10use.t
+SHA1 b4a95ca22b5c819dc56f9fbfb762bfc19f571fe1 t/20fetch_glob.t
+SHA1 bda55a98e61b16331437c0263f984875ee9c6135 t/30stash.t
+SHA1 caab8f55f5e83b73a0a02e1a611db5f77f03719c t/40delete_glob.t
+SHA1 abec3fa7149e59f9f36680c5a49dfbbebd9d6ecc t/test.pl
+SHA1 b56b358ce5eb4fd22d3e66f1cb1c5231bf0c457f xt/consistent_version_numbers.t
+SHA1 cd748ade99c6f4613a6a8b2579df4f55af6b9db8 xt/copyright.t
+SHA1 650dccfa9b6f5a98cf731c89041bea8935dbc623 xt/cover.pl
+SHA1 0cc035a7059d85dbe3345dd77ab3bfcb26747eea xt/distribution.t
+SHA1 ce95b12540d6fa64569e97e3bc58142d567a9109 xt/kwalitee.t
+SHA1 6e7f9dde7560793bcb40acc41561e07d163ad6d1 xt/minimumversion.t
+SHA1 8625d867e8834f8d88abc5b1d81ce455d8001b04 xt/perlcritic.t
+SHA1 c6767a84a229789d62b6513c50e174225a76e1da xt/perlcriticrc
+SHA1 775b3ac02805b6d703614f42608732fb43af2a41 xt/pod_coverage.t
+SHA1 de7e5d268dea91646feb893b8c2594c3435f7655 xt/pod_spell.xt
+SHA1 2c579b58def8daec94f41b628ac81c256faaa2b1 xt/pod_syntax.t
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+
+iEYEARECAAYFAkmG/dkACgkQhMHHe8CxClszmQCfR9KA42//1dAH/+5Z23PepXBC
+ilIAnA2zHVnALhbxHUeofcRfMx1rW7A+
+=JXeu
+-----END PGP SIGNATURE-----
