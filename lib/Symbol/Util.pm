@@ -47,8 +47,13 @@ our %EXPORT_TAGS = (all => [ @EXPORT_OK ]);
 
 # Returns a reference to the glob
 sub fetch_glob ($) {
+    my ($name) = @_;
+    
+    if ($name !~ /::/) {
+        $name = caller() . '::' . $name;
+    }; 
+
     no strict 'refs';
-    my $name = Symbol::qualify($_[0], caller);
     return \*{ $name };
 };
 
@@ -61,10 +66,13 @@ sub stash ($) {
 
 
 # Deletes a symbol in symbol table
+use YAML ();
 sub delete_glob ($;@) {
     my ($name, @slots) = @_;
 
-    $name = Symbol::qualify($name, caller);
+    if ($name !~ /::/) {
+        $name = caller() . '::' . $name;
+    }; 
 
     no strict 'refs';
     if (@slots) {
@@ -80,7 +88,7 @@ sub delete_glob ($;@) {
 
         foreach my $slot (qw{ SCALAR ARRAY HASH CODE IO FORMAT }) {
             *{$name} = $backup{$slot}
-                if not $delete{$slot} and defined $backup{$slot};
+                if exists $backup{$slot};
         };
 
         return \*{$name};
