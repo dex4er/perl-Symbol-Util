@@ -8,7 +8,7 @@ use Symbol ();
 
 $SIG{__WARN__} = sub { local $Carp::CarpLevel = 1; Carp::confess("Warning: ", @_) };
 
-use Test10::More tests => 10;
+use Test::More tests => 10;
 
 {
     package Symbol::Util::Test10::NoImport;

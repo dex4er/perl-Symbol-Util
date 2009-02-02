@@ -75,15 +75,13 @@ sub delete_glob ($;@) {
     if (@slots) {
         my %delete = map { $_ => 1 } @slots;
         my %backup;
-        foreach my $slot (qw{ SCALAR ARRAY HASH CODE IO FORMAT }) {
+        foreach my $slot (qw{ SCALAR ARRAY HASH CODE IO }) {
             $backup{$slot} = *{$name}{$slot}
                 if not $delete{$slot} and defined *{$name}{$slot};
         };
         undef *{$name};
 
-        return unless %backup;
-
-        foreach my $slot (qw{ SCALAR ARRAY HASH CODE IO FORMAT }) {
+        foreach my $slot (qw{ SCALAR ARRAY HASH CODE IO }) {
             *{$name} = $backup{$slot}
                 if exists $backup{$slot};
         };
@@ -163,6 +161,8 @@ Deletes the specified symbol name if I<slots> are not specified, or deletes
 the specified slots in symbol name (could be one or more of following strings:
 C<SCALAR>, C<ARRAY>, C<HASH>, C<CODE>, C<IO>, C<FORMAT>).
 
+Function returns the glob reference if there are any slots defined.
+
   our $FOO = 1;
   sub FOO { "bar" };
 
@@ -178,6 +178,11 @@ C<SCALAR>, C<ARRAY>, C<HASH>, C<CODE>, C<IO>, C<FORMAT>).
 L<Symbol>.
 
 =head1 BUGS
+
+C<delete_glob> always deletes C<FORMAT> slot.
+
+The C<SCALAR> slot is always defined after C<delete_glob> but can contain
+a reference to undefined value.
 
 If you find the bug, please report it.
 
