@@ -35,9 +35,6 @@ use warnings;
 our $VERSION = 0.01;
 
 
-use Symbol ();
-
-
 # Export
 use Exporter ();
 BEGIN { *import = \&Exporter::import; };
