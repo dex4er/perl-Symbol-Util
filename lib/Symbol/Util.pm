@@ -22,6 +22,9 @@ Symbol::Util - Additional utils for Perl symbols manipulation
 This module provides a set of additional functions useful for Perl
 symbols manipulation.
 
+I.e. C<delete_glob> function allows to delete specific slot of
+symbol name without deleting others.
+
 =for readme stop
 
 =cut
