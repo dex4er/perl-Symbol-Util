@@ -41,7 +41,7 @@ use Symbol ();
 # Export
 use Exporter ();
 BEGIN { *import = \&Exporter::import; };
-our @EXPORT_OK = qw{ fetch_glob stash };
+our @EXPORT_OK = qw{ fetch_glob stash delete_glob };
 our %EXPORT_TAGS = (all => [ @EXPORT_OK ]);
 
 
@@ -53,10 +53,44 @@ sub fetch_glob ($) {
 };
 
 
-# Returns a refernce to the stash
+# Returns a reference to the stash
 sub stash ($) {
     no strict 'refs';
     return \%{ *{ $_[0] . '::' } };
+};
+
+
+# Deletes a symbol in symbol table
+sub delete_glob ($;@) {
+    my ($name, @slots) = @_;
+
+    $name = Symbol::qualify($name, caller);
+
+    no strict 'refs';
+    if (@slots) {
+        my %delete = map { $_ => 1 } @slots;
+        my %backup;
+        foreach my $slot (qw{ SCALAR ARRAY HASH CODE IO FORMAT }) {
+            $backup{$slot} = *{$name}{$slot}
+                if not $delete{$slot} and defined *{$name}{$slot};
+        };
+        undef *{$name};
+
+        return unless %backup;
+
+        foreach my $slot (qw{ SCALAR ARRAY HASH CODE IO FORMAT }) {
+            *{$name} = $backup{$slot}
+                if not $delete{$slot} and defined $backup{$slot};
+        };
+
+        return \*{$name};
+    }
+    else {
+        # delete all slots
+        undef *{$name};
+    };
+
+    return;
 };
 
 
@@ -69,13 +103,14 @@ __END__
 
 = Class Diagram =
 
-[             <<utility>>
-             Symbol::Util
- ----------------------------------
- ----------------------------------
+[                      <<utility>>
+                       Symbol::Util
+ -------------------------------------------------------
+ -------------------------------------------------------
  fetch_glob( name : Str ) : GlobRef
- stash( name : Str ) : HashRef     
-                                   ]
+ stash( name : Str ) : HashRef
+ delete_glob( name : Str, slots : Array[Str] ) : GlobRef
+                                                        ]
 
 =end umlwiki
 
@@ -99,17 +134,37 @@ Imports all available symbols.
 
 Returns a reference to the glob for the specified symbol name.  If the
 symbol does not already exists it will be created.  If the symbol name is
-unqualified it will be looked up in the calling package.
+unqualified it will be looked up in the calling package.  It is safe to use
+this function with C<use strict 'refs'>.
 
 This function is taken from Kurila, a dialect of Perl.
+
+  my $caller = caller;
+  *{ fetch_glob("${caller}::foo") } = sub { "this is foo" };
 
 =item stash( I<name> : Str ) : HashRef
 
 Returns a refernce to the stash for the specified name.  If the stash does not
 already exists it will be created.  The name of the stash does not include the
-C<::> at the end.
+C<::> at the end.  It is safe to use this function with C<use strict 'refs'>.
 
 This function is taken from Kurila, a dialect of Perl.
+
+  print join "\n", keys %{ Symbol::stash("main") };
+
+=item delete_glob( I<name> : Str, I<slots> : Array[Str] ) : Maybe[GlobRef]
+
+Deletes the specified symbol name if I<slots> are not specified, or deletes
+the specified slots in symbol name (could be one or more of following strings:
+C<SCALAR>, C<ARRAY>, C<HASH>, C<CODE>, C<IO>, C<FORMAT>).
+
+  our $FOO = 1;
+  sub FOO { "bar" };
+
+  delete_glob("FOO", "CODE");
+
+  print $FOO;  # prints "1"
+  FOO();       # error: sub not found
 
 =back
 
