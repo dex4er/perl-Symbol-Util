@@ -12,6 +12,7 @@ use Test::More tests => 6;
 use Symbol::Util;
 
 {
+    no warnings 'once';
     package Symbol::Util::Test20;
     sub function { "function" };
     our $scalar = "scalar";

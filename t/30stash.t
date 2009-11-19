@@ -13,8 +13,9 @@ use Symbol::Util;
 
 {
     package Symbol::Util::Test30;
+    no warnings 'once';
     sub function { "function" };
     our $scalar = "scalar";
 };
 
-Test::More::is_deeply( [ sort keys %{Symbol::Util::stash("Symbol::Util::Test30")} ], [ qw{ function scalar } ], 'stash("Symbol::Util::Test30")' );
+Test::More::is_deeply( [ sort keys %{Symbol::Util::stash("Symbol::Util::Test30")} ], [ qw{ BEGIN function scalar } ], 'stash("Symbol::Util::Test30")' );

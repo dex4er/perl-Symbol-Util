@@ -13,6 +13,7 @@ use Symbol::Util 'delete_glob';
 
 {
     package Symbol::Util::Test40;
+    no warnings 'once';
     open FOO, __FILE__ or die $!;
     *FOO = sub { "code" };
     our $FOO = "scalar";
@@ -59,6 +60,7 @@ ok( ! fileno Symbol::Util::Test40::FOO, '*Symbol::Util::Test40::FOO{IO} is ok [5
 
 {
     package Symbol::Util::Test40;
+    no warnings 'once';
     open BAR, __FILE__ or die $!;
     *BAR = sub { "code" };
     our $BAR = "scalar";
