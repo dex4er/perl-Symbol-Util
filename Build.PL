@@ -21,6 +21,7 @@ my $build = Module::Build->new(
     },
     build_requires => {
     },
+    auto_configure_requires => 0,
     create_makefile_pl => 'traditional',
     create_readme => 1,
     create_license => 1,
@@ -28,7 +29,7 @@ my $build = Module::Build->new(
     recursive_test_files => 1,
     add_to_cleanup => [
         '*.bak', '*.gz', '*.tgz', '*.ppd', '*.ppmx', '*.deb', '*.bat',
-        'Makefile', 'pm_to_blib', 'cover_db', 'Debian_CPANTS.txt',
+        'Makefile', 'pm_to_blib', 'cover_db', 'xt/Debian_CPANTS.txt',
         "$dist-*",
     ],
     meta_merge => {
