@@ -76,20 +76,26 @@ sub delete_glob ($;@) {
         $name = caller() . '::' . $name;
     };
 
+    (my $package = $name) =~ s/([^:]*)$//;
+    my $subname = $1;
+
     no strict 'refs';
+    my $stash = \%{ *{$package} };
+
     if (@slots) {
         my %delete = map { $_ => 1 } @slots;
         my %backup;
-        foreach my $slot (qw{ SCALAR ARRAY HASH CODE IO }) {
+
+        $backup{SCALAR} = *{$name}{SCALAR}
+            if not $delete{SCALAR} and defined ${ *{$name}{SCALAR} };
+        foreach my $slot (qw{ ARRAY HASH CODE IO }) {
             $backup{$slot} = *{$name}{$slot}
                 if not $delete{$slot} and defined *{$name}{$slot};
         };
-        undef *{$name};
 
-        *{$name} = $backup{SCALAR}
-            if exists $backup{SCALAR} and defined ${ $backup{SCALAR} };
+        undef $stash->{$subname};
 
-        foreach my $slot (qw{ ARRAY HASH CODE IO }) {
+        foreach my $slot (qw{ SCALAR ARRAY HASH CODE IO }) {
             *{$name} = $backup{$slot}
                 if exists $backup{$slot};
         };
@@ -98,7 +104,7 @@ sub delete_glob ($;@) {
     }
     else {
         # delete all slots
-        undef *{$name};
+        undef $stash->{$subname};
     };
 
     return;
@@ -120,25 +126,25 @@ sub delete_sub ($) {
     return if not defined *{$name}{CODE};
 
     my %backup;
-    foreach my $slot (qw{ SCALAR ARRAY HASH CODE IO }) {
+
+    $backup{SCALAR} = *{$name}{SCALAR} if defined ${ *{$name}{SCALAR} };
+    foreach my $slot (qw{ ARRAY HASH CODE IO }) {
         $backup{$slot} = *{$name}{$slot}
             if defined *{$name}{$slot};
     };
     undef *{$name};
 
     *{$name} = $backup{CODE};
+
     my $stash = \%{ *{$package} };
     delete $stash->{$subname};
 
-    *{$name} = $backup{SCALAR}
-        if exists $backup{SCALAR} and defined ${ $backup{SCALAR} };
-
-    foreach my $slot (qw{ ARRAY HASH IO }) {
+    foreach my $slot (qw{ SCALAR ARRAY HASH IO }) {
         *{$name} = $backup{$slot}
             if exists $backup{$slot};
     };
 
-    return \*{$name};
+    return 1;
 };
 
 
