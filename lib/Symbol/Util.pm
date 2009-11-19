@@ -233,8 +233,8 @@ L<Symbol>.
 
 C<delete_glob> always deletes C<FORMAT> slot.
 
-The C<SCALAR> slot is always defined after C<delete_glob> but can contain
-a reference to undefined value.
+C<delete_glob> deletes C<SCALAR> slot if it exists and contains C<undef>
+value.
 
 If you find the bug, please report it.
 

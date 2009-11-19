@@ -1,4 +1,10 @@
 ------------------------------------------------------------------------
+0.02 | Piotr Roszatycki <dexter@debian.org> | 2009-11-19
+
+* Function "delete_glob" deletes SCALAR slot if it exists and contains
+  undef value.
+
+------------------------------------------------------------------------
 0.01 | Piotr Roszatycki <dexter@debian.org> | 2009-02-02
 
 * Initial release.
