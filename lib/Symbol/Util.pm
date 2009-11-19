@@ -322,11 +322,11 @@ If you find the bug, please report it.
 
 =head1 AUTHOR
 
-Piotr Roszatycki <dexter@debian.org>
+Piotr Roszatycki <dexter@cpan.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2009 by Piotr Roszatycki E<lt>dexter@debian.orgE<gt>.
+Copyright (C) 2009 by Piotr Roszatycki <dexter@cpan.org>.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
