@@ -35,13 +35,13 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = 0.01;
+our $VERSION = '0.02';
 
 
 # Export
 use Exporter ();
 BEGIN { *import = \&Exporter::import; };
-our @EXPORT_OK = qw{ fetch_glob stash delete_glob };
+our @EXPORT_OK = qw{ fetch_glob stash delete_glob delete_sub };
 our %EXPORT_TAGS = (all => [ @EXPORT_OK ]);
 
 
@@ -51,10 +51,10 @@ our %EXPORT_TAGS = (all => [ @EXPORT_OK ]);
 # Returns a reference to the glob
 sub fetch_glob ($) {
     my ($name) = @_;
-    
+
     if ($name !~ /::/) {
         $name = caller() . '::' . $name;
-    }; 
+    };
 
     no strict 'refs';
     return \*{ $name };
@@ -74,7 +74,7 @@ sub delete_glob ($;@) {
 
     if ($name !~ /::/) {
         $name = caller() . '::' . $name;
-    }; 
+    };
 
     no strict 'refs';
     if (@slots) {
@@ -86,7 +86,10 @@ sub delete_glob ($;@) {
         };
         undef *{$name};
 
-        foreach my $slot (qw{ SCALAR ARRAY HASH CODE IO }) {
+        *{$name} = $backup{SCALAR}
+            if exists $backup{SCALAR} and defined ${ $backup{SCALAR} };
+
+        foreach my $slot (qw{ ARRAY HASH CODE IO }) {
             *{$name} = $backup{$slot}
                 if exists $backup{$slot};
         };
@@ -99,6 +102,43 @@ sub delete_glob ($;@) {
     };
 
     return;
+};
+
+
+# Deletes a sub in symbol table
+sub delete_sub ($) {
+    my ($name) = @_;
+
+    if ($name !~ /::/) {
+        $name = caller() . '::' . $name;
+    };
+
+    (my $package = $name) =~ s/([^:]*)$//;
+    my $subname = $1;
+
+    no strict 'refs';
+    return if not defined *{$name}{CODE};
+
+    my %backup;
+    foreach my $slot (qw{ SCALAR ARRAY HASH CODE IO }) {
+        $backup{$slot} = *{$name}{$slot}
+            if defined *{$name}{$slot};
+    };
+    undef *{$name};
+
+    *{$name} = $backup{CODE};
+    my $stash = \%{ *{$package} };
+    delete $stash->{$subname};
+
+    *{$name} = $backup{SCALAR}
+        if exists $backup{SCALAR} and defined ${ $backup{SCALAR} };
+
+    foreach my $slot (qw{ ARRAY HASH IO }) {
+        *{$name} = $backup{$slot}
+            if exists $backup{$slot};
+    };
+
+    return \*{$name};
 };
 
 
@@ -118,6 +158,7 @@ __END__
  fetch_glob( name : Str ) : GlobRef
  stash( name : Str ) : HashRef
  delete_glob( name : Str, slots : Array[Str] ) : GlobRef
+ delete_sub( name : Str ) : GlobRef
                                                         ]
 
 =end umlwiki
