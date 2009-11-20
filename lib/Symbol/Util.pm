@@ -170,6 +170,8 @@ sub delete_sub ($) {
 
     return if not defined fetch_glob($name, 'CODE');
 
+    my $stash = stash($package);
+
     my %backup;
 
     $backup{SCALAR} = fetch_glob($name, 'SCALAR') if defined ${ fetch_glob($name, 'SCALAR') };
@@ -177,12 +179,11 @@ sub delete_sub ($) {
         $backup{$slot} = fetch_glob($name, $slot)
             if defined fetch_glob($name, $slot);
     };
-    undef *{ fetch_glob($name) };
+    undef $stash->{$subname};
 
     *{ fetch_glob($name) } = $backup{CODE};
     delete $backup{CODE};
 
-    my $stash = stash($package);
     delete $stash->{$subname};
 
     foreach my $slot (qw{ SCALAR ARRAY HASH IO }) {
