@@ -89,7 +89,7 @@ sub import {
     $EXPORT_DONE{$caller}{$_} = 1 foreach keys %exports;
 
     foreach my $name (keys %exports) {
-        *{ fetch_glob("${caller}::$name") } = fetch_glob($name, "CODE");
+        *{ fetch_glob("${caller}::$name") } = fetch_glob($name, 'CODE');
     };
 };
 
@@ -214,7 +214,7 @@ sub list_glob_slots ($) {
     push @slots, 'SCALAR'
         if defined *{ $name }{SCALAR} and defined ${ *{ $name }{SCALAR} };
 
-    foreach my $slot (qw{ ARRAY HASH CODE IO }) {
+    foreach my $slot (qw( ARRAY HASH CODE IO )) {
         push @slots, $slot if defined *{ $name }{$slot};
     };
 
