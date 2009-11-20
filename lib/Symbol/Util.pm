@@ -54,6 +54,18 @@ my %EXPORT_DONE;
 ## no critic (ProhibitSubroutinePrototypes)
 ## no critic (RequireArgUnpacking)
 
+=head1 IMPORTS
+
+By default, the class does not export its symbols.
+
+=over
+
+=item use Symbol::Util ':all';
+
+Imports all available symbols.
+
+=cut
+
 # Exports functions to caller space
 sub import {
     my ($class, @args) = @_;
@@ -81,6 +93,14 @@ sub import {
 };
 
 
+=item no Symbol::Util;
+
+Deletes all imported symbols from caller name space.
+
+=back
+
+=cut
+
 # Deletes functions from caller space
 sub unimport {
     my ($class) = @_;
@@ -95,6 +115,31 @@ sub unimport {
 };
 
 
+=head1 FUNCTIONS
+
+=over
+
+=item fetch_glob( I<name> : Str ) : GlobRef
+
+=item fetch_glob( I<name> : Str, I<slot> : Str ) : Ref
+
+Returns a reference to the glob for the specified symbol name.  If the
+symbol does not already exists it will be created.  If the symbol name is
+unqualified it will be looked up in the calling package.  It is safe to use
+this function with C<use strict 'refs'>.
+
+If I<slot> is defined, reference to its value is returned.  The I<slot> can be
+one of the following strings: C<SCALAR>, C<ARRAY>, C<HASH>, C<CODE>, C<IO>,
+C<FORMAT>).
+
+This function is taken from Kurila, a dialect of Perl.
+
+  my $caller = caller;
+  *{ fetch_glob("${caller}::foo") } = sub { "this is foo" };
+  *{ fetch_glob("${caller}::bar") } = fetch_glob("${caller}::foo", "CODE");
+
+=cut
+
 # Returns a reference to the glob or its slot
 sub fetch_glob ($;$) {
     my ($name, $slot) = @_;
@@ -107,6 +152,21 @@ sub fetch_glob ($;$) {
     return defined $slot ? *{ $name }{$slot} : \*{ $name };
 };
 
+
+=item export_glob( I<package>, I<name> : Str ) : GlobRef
+
+=item export_glob( I<package>, I<name> : Str, I<slot> : Str ) : Ref
+
+Exports a glob I<name> to the I<package>.  Optionaly exports only one slot
+of the glob.
+
+  sub my_function { ... };
+  sub import {
+      my $caller = caller;
+      export_glob($caller, "my_function");
+  }
+
+=cut
 
 # Exports glob to other package
 sub export_glob ($$;$) {
@@ -122,7 +182,7 @@ sub export_glob ($$;$) {
     my $dstname = $package . "::$srcsubname";
 
     no strict 'refs';
-    
+
     return if defined $slot
               ? ! defined *{ $name }{$slot}
               : ! defined *{ $name } ;
@@ -131,6 +191,34 @@ sub export_glob ($$;$) {
     return \*{ $dstname };
 };
 
+
+=item stash( I<name> : Str ) : HashRef
+
+Returns a refernce to the stash for the specified name.  If the stash does not
+already exists it will be created.  The name of the stash does not include the
+C<::> at the end.  It is safe to use this function with C<use strict 'refs'>.
+
+This function is taken from Kurila, a dialect of Perl.
+
+  print join "\n", keys %{ Symbol::stash("main") };
+
+=item delete_glob( I<name> : Str, I<slots> : Array[Str] ) : Maybe[GlobRef]
+
+Deletes the specified symbol name if I<slots> are not specified, or deletes
+the specified slots in symbol name (could be one or more of the following
+strings: C<SCALAR>, C<ARRAY>, C<HASH>, C<CODE>, C<IO>, C<FORMAT>).
+
+Function returns the glob reference if there are any slots defined.
+
+  our $FOO = 1;
+  sub FOO { "bar" };
+
+  delete_glob("FOO", "CODE");
+
+  print $FOO;  # prints "1"
+  FOO();       # error: sub not found
+
+=cut
 
 # Returns a reference to the stash
 sub stash ($) {
@@ -180,6 +268,34 @@ sub delete_glob ($;@) {
     return;
 };
 
+
+=item delete_sub( I<name> : Str ) : Maybe[GlobRef]
+
+Deletes the specified subroutine name from class API.  It means that this
+subroutine will be no longer available as the class method.
+
+Function returns the glob reference if there are any other slots still defined
+than <CODE> slot.
+
+  package My::Class;
+
+  use constant PI => 3.14159265;
+
+  use Symbol::Util 'delete_sub';
+  delete_sub "PI";   # remove constant from public API
+  no Symbol::Util;   # remove also Symbol::Util::* from public API
+
+  sub area {
+      my ($self, $r) = @_;
+      return PI * $r ** 2
+  }
+
+  print My::Class->area(2);   # prints 12.5663706
+  print My::Class->PI;        # can't locate object method
+
+=back
+
+=cut
 
 # Deletes a sub in symbol table
 sub delete_sub ($) {
@@ -242,110 +358,6 @@ __END__
                                                                    ]
 
 =end umlwiki
-
-=head1 IMPORTS
-
-By default, the class does not export its symbols.
-
-=over
-
-=item use Symbol::Util ':all';
-
-Imports all available symbols.
-
-=item no Symbol::Util;
-
-Deletes all imported symbols from caller name space.
-
-=back
-
-=head1 FUNCTIONS
-
-=over
-
-=item fetch_glob( I<name> : Str ) : GlobRef
-
-=item fetch_glob( I<name> : Str, I<slot> : Str ) : Ref
-
-Returns a reference to the glob for the specified symbol name.  If the
-symbol does not already exists it will be created.  If the symbol name is
-unqualified it will be looked up in the calling package.  It is safe to use
-this function with C<use strict 'refs'>.
-
-If I<slot> is defined, reference to its value is returned.  The I<slot> can be
-one of the following strings: C<SCALAR>, C<ARRAY>, C<HASH>, C<CODE>, C<IO>,
-C<FORMAT>).
-
-This function is taken from Kurila, a dialect of Perl.
-
-  my $caller = caller;
-  *{ fetch_glob("${caller}::foo") } = sub { "this is foo" };
-  *{ fetch_glob("${caller}::bar") } = fetch_glob("${caller}::foo", "CODE");
-
-=item export_glob( I<package>, I<name> : Str ) : GlobRef
-
-=item export_glob( I<package>, I<name> : Str, I<slot> : Str ) : Ref
-
-Exports a glob I<name> to the I<package>.  Optionaly exports only one slot
-of the glob.
-
-  sub my_function { ... };
-  sub import {
-      my $caller = caller;
-      export_glob($caller, "my_function");
-  }
-
-=item stash( I<name> : Str ) : HashRef
-
-Returns a refernce to the stash for the specified name.  If the stash does not
-already exists it will be created.  The name of the stash does not include the
-C<::> at the end.  It is safe to use this function with C<use strict 'refs'>.
-
-This function is taken from Kurila, a dialect of Perl.
-
-  print join "\n", keys %{ Symbol::stash("main") };
-
-=item delete_glob( I<name> : Str, I<slots> : Array[Str] ) : Maybe[GlobRef]
-
-Deletes the specified symbol name if I<slots> are not specified, or deletes
-the specified slots in symbol name (could be one or more of the following
-strings: C<SCALAR>, C<ARRAY>, C<HASH>, C<CODE>, C<IO>, C<FORMAT>).
-
-Function returns the glob reference if there are any slots defined.
-
-  our $FOO = 1;
-  sub FOO { "bar" };
-
-  delete_glob("FOO", "CODE");
-
-  print $FOO;  # prints "1"
-  FOO();       # error: sub not found
-
-=item delete_sub( I<name> : Str ) : Maybe[GlobRef]
-
-Deletes the specified subroutine name from class API.  It means that this
-subroutine will be no longer available as the class method.
-
-Function returns the glob reference if there are any other slots still defined
-than <CODE> slot.
-
-  package My::Class;
-
-  use constant PI => 3.14159265;
-
-  use Symbol::Util 'delete_sub';
-  delete_sub "PI";   # remove constant from public API
-  no Symbol::Util;   # remove also Symbol::Util::* from public API
-
-  sub area {
-      my ($self, $r) = @_;
-      return PI * $r ** 2
-  }
-
-  print My::Class->area(2);   # prints 12.5663706
-  print My::Class->PI;        # can't locate object method
-
-=back
 
 =head1 SEE ALSO
 
