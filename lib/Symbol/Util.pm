@@ -48,8 +48,6 @@ our $VERSION = '0.02';
 
 
 # Export
-my @EXPORT_OK = qw( delete_glob delete_sub export_glob fetch_glob list_glob_slots stash );
-my %EXPORT_TAGS = (all => [ @EXPORT_OK ]);
 my %EXPORT_DONE;
 
 
@@ -69,28 +67,15 @@ Imports all available symbols.
 =cut
 
 sub import {
-    my ($class, @args) = @_;
+    my ($class, @names) = @_;
 
-    my $caller = caller();
+    my @EXPORT_OK = grep { /^[a-z]/ && !/^(import|unimport)$/ } keys %{ stash(__PACKAGE__) };
+    my %EXPORT_TAGS = ( all => [ @EXPORT_OK ] );
 
-    my %exports;
-
-    while (my $name = shift @args) {
-        if ($name =~ /^:(.*)$/) {
-            my $tag = $1;
-            next unless defined $EXPORT_TAGS{$tag};
-            $exports{$_} = 1 foreach @{ $EXPORT_TAGS{$tag} };
-        }
-        elsif (defined fetch_glob($name, 'CODE')) {
-            $exports{$name} = 1;
-        };
-    };
-
-    $EXPORT_DONE{$caller}{$_} = 1 foreach keys %exports;
-
-    foreach my $name (keys %exports) {
-        *{ fetch_glob("${caller}::$name") } = fetch_glob($name, 'CODE');
-    };
+    return export_package(caller(), __PACKAGE__, {
+        OK => [ @EXPORT_OK ],
+        TAGS => { %EXPORT_TAGS },  
+    }, @names);
 };
 
 
@@ -221,6 +206,7 @@ sub list_glob_slots ($) {
     return @slots;
 };
 
+
 =item export_glob( I<package>, I<name> : Str ) : GlobRef
 
 =item export_glob( I<package>, I<name> : Str, I<slot> : Str ) : Ref
@@ -339,8 +325,6 @@ than <CODE> slot.
   print My::Class->area(2);   # prints 12.5663706
   print My::Class->PI;        # can't locate object method
 
-=back
-
 =cut
 
 sub delete_sub ($) {
@@ -374,6 +358,41 @@ sub delete_sub ($) {
     };
 
     return %backup ? fetch_glob($name) : undef;
+};
+
+
+=item export_package( I<target> : Str, I<package> : Str, I<names> : Array[Str] )
+
+=item export_package( I<target> : Str, I<package> : Str, I<spec> : HashRef, I<names> : Array[Str] )
+
+=back
+
+=cut
+
+sub export_package ($$@) {
+    my $target = shift;
+    my $package = shift;
+    my $spec = ref $_[0] eq 'HASH' ? shift : undef;
+    my @names = @_;
+
+    my %exports;
+
+    while (my $name = shift @names) {
+        if ($name =~ /^:(.*)$/) {
+            my $tag = $1;
+            next unless defined $spec->{TAGS}{$tag};
+            $exports{$_} = 1 foreach @{ $spec->{TAGS}{$tag} };
+        }
+        elsif (defined fetch_glob($name, 'CODE')) {
+            $exports{$name} = 1;
+        };
+    };
+
+    $EXPORT_DONE{$target}{$_} = 1 foreach keys %exports;
+
+    foreach my $name (keys %exports) {
+        export_glob($target, "${package}::$name", 'CODE');
+    };
 };
 
 
