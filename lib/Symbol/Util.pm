@@ -361,11 +361,11 @@ __END__
                        Symbol::Util
  ------------------------------------------------------------------
  ------------------------------------------------------------------
+ stash( name : Str ) : HashRef
  fetch_glob( name : Str ) : GlobRef
  fetch_glob( name : Str, slot : Str ) : Ref
  export_glob( package : Str, name : Str ) : GlobRef
  export_glob( package : Str, name : Str, slot : Str ) : GlobRef
- stash( name : Str ) : HashRef
  delete_glob( name : Str, slots : Array[Str] ) : GlobRef
  delete_sub( name : Str ) : GlobRef
                                                                    ]
