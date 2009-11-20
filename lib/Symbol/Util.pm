@@ -68,7 +68,6 @@ Imports all available symbols.
 
 =cut
 
-# Exports functions to caller space
 sub import {
     my ($class, @args) = @_;
 
@@ -103,7 +102,6 @@ Deletes all imported symbols from caller name space.
 
 =cut
 
-# Deletes functions from caller space
 sub unimport {
     my ($class) = @_;
 
@@ -120,79 +118,6 @@ sub unimport {
 =head1 FUNCTIONS
 
 =over
-
-=item fetch_glob( I<name> : Str ) : GlobRef
-
-=item fetch_glob( I<name> : Str, I<slot> : Str ) : Ref
-
-Returns a reference to the glob for the specified symbol name.  If the
-symbol does not already exists it will be created.  If the symbol name is
-unqualified it will be looked up in the calling package.  It is safe to use
-this function with C<use strict 'refs'>.
-
-If I<slot> is defined, reference to its value is returned.  The I<slot> can be
-one of the following strings: C<SCALAR>, C<ARRAY>, C<HASH>, C<CODE>, C<IO>,
-C<FORMAT>).
-
-This function is taken from Kurila, a dialect of Perl.
-
-  my $caller = caller;
-  *{ fetch_glob("${caller}::foo") } = sub { "this is foo" };
-  *{ fetch_glob("${caller}::bar") } = fetch_glob("${caller}::foo", "CODE");
-
-=cut
-
-# Returns a reference to the glob or its slot
-sub fetch_glob ($;$) {
-    my ($name, $slot) = @_;
-
-    if ($name !~ /::/) {
-        $name = caller() . '::' . $name;
-    };
-
-    no strict 'refs';
-    return defined $slot ? *{ $name }{$slot} : \*{ $name };
-};
-
-
-=item export_glob( I<package>, I<name> : Str ) : GlobRef
-
-=item export_glob( I<package>, I<name> : Str, I<slot> : Str ) : Ref
-
-Exports a glob I<name> to the I<package>.  Optionaly exports only one slot
-of the glob.
-
-  sub my_function { ... };
-  sub import {
-      my $caller = caller;
-      export_glob($caller, "my_function");
-  }
-
-=cut
-
-# Exports glob to other package
-sub export_glob ($$;$) {
-    my ($package, $name, $slot) = @_;
-
-    if ($name !~ /::/) {
-        $name = caller() . '::' . $name;
-    };
-
-    (my $srcpackage = $name) =~ s/::([^:]*)$//;
-    my $srcsubname = $1;
-
-    my $dstname = $package . "::$srcsubname";
-
-    no strict 'refs';
-
-    return if defined $slot
-              ? ! defined *{ $name }{$slot}
-              : ! defined *{ $name } ;
-
-    *{ $dstname } = defined $slot ? *{ $name }{$slot} : *{ $name };
-    return \*{ $dstname };
-};
-
 
 =item stash( I<name> : Str ) : HashRef
 
@@ -222,14 +147,101 @@ Function returns the glob reference if there are any slots defined.
 
 =cut
 
-# Returns a reference to the stash
 sub stash ($) {
     no strict 'refs';
     return \%{ *{ $_[0] . '::' } };
 };
 
 
-# Deletes a symbol in symbol table
+=item fetch_glob( I<name> : Str ) : GlobRef
+
+=item fetch_glob( I<name> : Str, I<slot> : Str ) : Ref
+
+Returns a reference to the glob for the specified symbol name.  If the
+symbol does not already exists it will be created.  If the symbol name is
+unqualified it will be looked up in the calling package.  It is safe to use
+this function with C<use strict 'refs'>.
+
+If I<slot> is defined, reference to its value is returned.  The I<slot> can be
+one of the following strings: C<SCALAR>, C<ARRAY>, C<HASH>, C<CODE>, C<IO>,
+C<FORMAT>).
+
+This function is taken from Kurila, a dialect of Perl.
+
+  my $caller = caller;
+  *{ fetch_glob("${caller}::foo") } = sub { "this is foo" };
+  *{ fetch_glob("${caller}::bar") } = fetch_glob("${caller}::foo", "CODE");
+
+=cut
+
+sub fetch_glob ($;$) {
+    my ($name, $slot) = @_;
+
+    if ($name !~ /::/) {
+        $name = caller() . '::' . $name;
+    };
+
+    no strict 'refs';
+    return defined $slot ? *{ $name }{$slot} : \*{ $name };
+};
+
+
+=item export_glob( I<package>, I<name> : Str ) : GlobRef
+
+=item export_glob( I<package>, I<name> : Str, I<slot> : Str ) : Ref
+
+Exports a glob I<name> to the I<package>.  Optionaly exports only one slot
+of the glob.
+
+  sub my_function { ... };
+  sub import {
+      my $caller = caller;
+      export_glob($caller, "my_function");
+  }
+
+=cut
+
+sub export_glob ($$;$) {
+    my ($package, $name, $slot) = @_;
+
+    if ($name !~ /::/) {
+        $name = caller() . '::' . $name;
+    };
+
+    (my $srcpackage = $name) =~ s/::([^:]*)$//;
+    my $srcsubname = $1;
+
+    my $dstname = $package . "::$srcsubname";
+
+    no strict 'refs';
+
+    return if defined $slot
+              ? ! defined *{ $name }{$slot}
+              : ! defined *{ $name } ;
+
+    *{ $dstname } = defined $slot ? *{ $name }{$slot} : *{ $name };
+    return \*{ $dstname };
+};
+
+
+=item delete_glob( I<name> : Str, I<slots> : Array[Str] ) : Maybe[GlobRef]
+
+Deletes the specified symbol name if I<slots> are not specified, or deletes
+the specified slots in the symbol name (could be one or more of the following
+strings: C<SCALAR>, C<ARRAY>, C<HASH>, C<CODE>, C<IO>, C<FORMAT>).
+
+Function returns the glob reference if there are any slots defined.
+
+  our $FOO = 1;
+  sub FOO { "bar" };
+
+  delete_glob("FOO", "CODE");
+
+  print $FOO;  # prints "1"
+  FOO();       # error: sub not found
+
+=cut
+
 sub delete_glob ($;@) {
     my ($name, @slots) = @_;
 
@@ -299,7 +311,6 @@ than <CODE> slot.
 
 =cut
 
-# Deletes a sub in symbol table
 sub delete_sub ($) {
     my ($name) = @_;
 
