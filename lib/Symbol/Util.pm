@@ -46,7 +46,7 @@ our $VERSION = '0.02';
 
 
 # Export
-my @EXPORT_OK = qw( fetch_glob stash delete_glob delete_sub );
+my @EXPORT_OK = qw( delete_glob delete_sub export_glob fetch_glob stash );
 my %EXPORT_TAGS = (all => [ @EXPORT_OK ]);
 my %EXPORT_DONE;
 
@@ -105,6 +105,30 @@ sub fetch_glob ($;$) {
 
     no strict 'refs';
     return defined $slot ? *{ $name }{$slot} : \*{ $name };
+};
+
+
+# Exports glob to other package
+sub export_glob ($$;$) {
+    my ($package, $name, $slot) = @_;
+
+    if ($name !~ /::/) {
+        $name = caller() . '::' . $name;
+    };
+
+    (my $srcpackage = $name) =~ s/::([^:]*)$//;
+    my $srcsubname = $1;
+
+    my $dstname = $package . "::$srcsubname";
+
+    no strict 'refs';
+    
+    return if defined $slot
+              ? ! defined *{ $name }{$slot}
+              : ! defined *{ $name } ;
+
+    *{ $dstname } = defined $slot ? *{ $name }{$slot} : *{ $name };
+    return \*{ $dstname };
 };
 
 
@@ -206,14 +230,16 @@ __END__
 
 [                      <<utility>>
                        Symbol::Util
- -------------------------------------------------------
- -------------------------------------------------------
+ ------------------------------------------------------------------
+ ------------------------------------------------------------------
  fetch_glob( name : Str ) : GlobRef
  fetch_glob( name : Str, slot : Str ) : Ref
+ export_glob( package : Str, name : Str ) : GlobRef
+ export_glob( package : Str, name : Str, slot : Str ) : GlobRef
  stash( name : Str ) : HashRef
  delete_glob( name : Str, slots : Array[Str] ) : GlobRef
  delete_sub( name : Str ) : GlobRef
-                                                        ]
+                                                                   ]
 
 =end umlwiki
 
@@ -255,6 +281,19 @@ This function is taken from Kurila, a dialect of Perl.
   my $caller = caller;
   *{ fetch_glob("${caller}::foo") } = sub { "this is foo" };
   *{ fetch_glob("${caller}::bar") } = fetch_glob("${caller}::foo", "CODE");
+
+=item export_glob( I<package>, I<name> : Str ) : GlobRef
+
+=item export_glob( I<package>, I<name> : Str, I<slot> : Str ) : Ref
+
+Exports a glob I<name> to the I<package>.  Optionaly exports only one slot
+of the glob.
+
+  sub my_function { ... };
+  sub import {
+      my $caller = caller;
+      export_glob($caller, "my_function");
+  }
 
 =item stash( I<name> : Str ) : HashRef
 
