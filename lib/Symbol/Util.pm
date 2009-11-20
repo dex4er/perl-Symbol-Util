@@ -18,22 +18,8 @@ Symbol::Util - Additional utils for Perl symbols manipulation
 
   delete_glob("${caller}::foo", "CODE");
 
-  # Example for "delete_sub"
-  package My::Class;
-
   use constant PI => 3.14159265;
-
-  use Symbol::Util 'delete_sub';
   delete_sub "PI";   # remove constant from public API
-  no Symbol::Util;   # remove also Symbol::Util::* from public API
-
-  sub area {
-      my ($self, $r) = @_;
-      return PI * $r ** 2
-  }
-
-  print My::Class->area(2);   # prints 12.5663706
-  print My::Class->PI;        # can't locate object method
 
 =head1 DESCRIPTION
 
@@ -303,11 +289,27 @@ subroutine will be no longer available as the class method.
 Function returns the glob reference if there are any other slots still defined
 than <CODE> slot.
 
+  package My::Class;
+
+  use constant PI => 3.14159265;
+
+  use Symbol::Util 'delete_sub';
+  delete_sub "PI";   # remove constant from public API
+  no Symbol::Util;   # remove also Symbol::Util::* from public API
+
+  sub area {
+      my ($self, $r) = @_;
+      return PI * $r ** 2
+  }
+
+  print My::Class->area(2);   # prints 12.5663706
+  print My::Class->PI;        # can't locate object method
+
 =back
 
 =head1 SEE ALSO
 
-L<Symbol>.
+L<Symbol>, L<Sub::Delete>.
 
 =head1 BUGS
 
