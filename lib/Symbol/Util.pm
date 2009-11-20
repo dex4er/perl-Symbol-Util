@@ -48,7 +48,7 @@ our $VERSION = '0.02';
 
 
 # Export
-my @EXPORT_OK = qw( delete_glob delete_sub export_glob fetch_glob stash );
+my @EXPORT_OK = qw( delete_glob delete_sub export_glob fetch_glob list_glob_slots stash );
 my %EXPORT_TAGS = (all => [ @EXPORT_OK ]);
 my %EXPORT_DONE;
 
@@ -186,6 +186,41 @@ sub fetch_glob ($;$) {
 };
 
 
+=item list_glob_slots( I<name> ) : Array
+
+Returns a list of slot names for glob with specified name which have defined
+value.  If the glob is undefined, the C<undef> value is returned.  If the glob
+is defined and has no defined slots, the empty list is returned.
+
+The C<SCALAR> slot is used only if it constains defined value.
+
+  print join ",", list_glob_slots("foo");
+
+=cut
+
+sub list_glob_slots ($) {
+    my ($name) = @_;
+
+    if ($name !~ /::/) {
+        $name = caller() . '::' . $name;
+    };
+
+    my @slots;
+
+    no strict 'refs';
+
+    return undef if not defined *{ $name };
+
+    push @slots, 'SCALAR'
+        if defined *{ $name }{SCALAR} and defined ${ *{ $name }{SCALAR} };
+
+    foreach my $slot (qw{ ARRAY HASH CODE IO }) {
+        push @slots, $slot if defined *{ $name }{$slot};
+    };
+
+    return @slots;
+};
+
 =item export_glob( I<package>, I<name> : Str ) : GlobRef
 
 =item export_glob( I<package>, I<name> : Str, I<slot> : Str ) : Ref
@@ -258,18 +293,15 @@ sub delete_glob ($;@) {
         my %delete = map { $_ => 1 } @slots;
         my %backup;
 
-        $backup{SCALAR} = fetch_glob($name, 'SCALAR')
-            if not $delete{SCALAR} and defined fetch_glob($name, 'SCALAR');
-        foreach my $slot (qw{ ARRAY HASH CODE IO }) {
+        foreach my $slot (list_glob_slots($name)) {
             $backup{$slot} = fetch_glob($name, $slot)
-                if not $delete{$slot} and defined fetch_glob($name, $slot);
+                if not $delete{$slot};
         };
 
         undef $stash->{$subname};
 
-        foreach my $slot (qw{ SCALAR ARRAY HASH CODE IO }) {
-            *{ fetch_glob($name) } = $backup{$slot}
-                if exists $backup{$slot};
+        foreach my $slot (keys %backup) {
+            *{ fetch_glob($name) } = $backup{$slot};
         };
 
         return fetch_glob($name);
@@ -327,10 +359,8 @@ sub delete_sub ($) {
 
     my %backup;
 
-    $backup{SCALAR} = fetch_glob($name, 'SCALAR') if defined ${ fetch_glob($name, 'SCALAR') };
-    foreach my $slot (qw{ ARRAY HASH CODE IO }) {
-        $backup{$slot} = fetch_glob($name, $slot)
-            if defined fetch_glob($name, $slot);
+    foreach my $slot (list_glob_slots($name)) {
+        $backup{$slot} = fetch_glob($name, $slot);
     };
     undef $stash->{$subname};
 
@@ -339,9 +369,8 @@ sub delete_sub ($) {
 
     delete $stash->{$subname};
 
-    foreach my $slot (qw{ SCALAR ARRAY HASH IO }) {
-        *{ fetch_glob($name) } = $backup{$slot}
-            if exists $backup{$slot};
+    foreach my $slot (keys %backup) {
+        *{ fetch_glob($name) } = $backup{$slot};
     };
 
     return %backup ? fetch_glob($name) : undef;
@@ -364,6 +393,7 @@ __END__
  stash( name : Str ) : HashRef
  fetch_glob( name : Str ) : GlobRef
  fetch_glob( name : Str, slot : Str ) : Ref
+ list_glob_slots( name : Str ) : Array
  export_glob( package : Str, name : Str ) : GlobRef
  export_glob( package : Str, name : Str, slot : Str ) : GlobRef
  delete_glob( name : Str, slots : Array[Str] ) : GlobRef
