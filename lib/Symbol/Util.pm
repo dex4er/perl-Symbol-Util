@@ -13,6 +13,8 @@ Symbol::Util - Additional utils for Perl symbols manipulation
   my $caller = caller;
   *{ fetch_glob("${caller}::foo") } = sub { "this is foo" };
   *{ fetch_glob("${caller}::bar") } = fetch_glob("${caller}::foo", "CODE");
+  sub baz { 42; }
+  export_glob($caller, "baz");
 
   print join "\n", keys %{ stash("main") };
 
