@@ -8,7 +8,7 @@ use Symbol ();
 
 $SIG{__WARN__} = sub { local $Carp::CarpLevel = 1; Carp::confess("Warning: ", @_) };
 
-use Test::More tests => 16;
+use Test::More tests => 18;
 
 {
     package Symbol::Util::Test10::NoImport;
@@ -22,7 +22,15 @@ use Test::More tests => 16;
 is( $@, '', 'use Symbol::Util' );
 is_deeply( [ keys %{*Symbol::Util::Test10::NoImport::} ], [], 'no functions imported' );
 
-my @functions = qw{ delete_glob delete_sub export_glob fetch_glob list_glob_slots stash };
+my @functions = qw(
+    delete_glob
+    delete_sub
+    export_glob
+    export_package
+    fetch_glob
+    list_glob_slots
+    stash
+);
 
 {
     package Symbol::Util::Test10::AllImport;

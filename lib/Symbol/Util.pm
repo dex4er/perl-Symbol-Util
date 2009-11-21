@@ -69,12 +69,14 @@ Imports all available symbols.
 sub import {
     my ($class, @names) = @_;
 
+    my $caller = caller();
+
     my @EXPORT_OK = grep { /^[a-z]/ && !/^(import|unimport)$/ } keys %{ stash(__PACKAGE__) };
     my %EXPORT_TAGS = ( all => [ @EXPORT_OK ] );
 
-    return export_package(caller(), __PACKAGE__, {
+    return export_package($caller, __PACKAGE__, {
         OK => [ @EXPORT_OK ],
-        TAGS => { %EXPORT_TAGS },  
+        TAGS => { %EXPORT_TAGS },
     }, @names);
 };
 
