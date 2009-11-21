@@ -51,8 +51,8 @@ our $VERSION = '0.02';
 my %EXPORT_DONE;
 
 
-## no critic (ProhibitSubroutinePrototypes)
-## no critic (RequireArgUnpacking)
+## no critic qw(ProhibitSubroutinePrototypes)
+## no critic qw(RequireArgUnpacking)
 
 =head1 IMPORTS
 
