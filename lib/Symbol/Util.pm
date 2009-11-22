@@ -47,8 +47,8 @@ use warnings;
 our $VERSION = '0.02';
 
 
-# Export
-my %EXPORT_DONE;
+# Exported symbols $EXPORTED{$target}{$package}{$name}{$slot} = 1
+my %EXPORTED;
 
 
 ## no critic qw(ProhibitSubroutinePrototypes)
@@ -67,14 +67,14 @@ Imports all available symbols.
 =cut
 
 sub import {
-    my ($class, @names) = @_;
+    my ($package, @names) = @_;
 
     my $caller = caller();
 
     my @EXPORT_OK = grep { /^[a-z]/ && !/^(import|unimport)$/ } keys %{ stash(__PACKAGE__) };
     my %EXPORT_TAGS = ( all => [ @EXPORT_OK ] );
 
-    return export_package($caller, __PACKAGE__, {
+    return export_package($caller, $package, {
         OK => [ @EXPORT_OK ],
         TAGS => { %EXPORT_TAGS },
     }, @names);
@@ -90,15 +90,11 @@ Deletes all imported symbols from caller name space.
 =cut
 
 sub unimport {
-    my ($class) = @_;
+    my ($package) = @_;
 
     my $caller = caller();
 
-    foreach my $name (keys %{ $EXPORT_DONE{$caller} }) {
-        delete_sub("${caller}::$name");
-    };
-
-    delete $EXPORT_DONE{$caller};
+    return unexport_package($caller, $package);
 };
 
 
@@ -374,26 +370,92 @@ sub delete_sub ($) {
 sub export_package ($$@) {
     my $target = shift;
     my $package = shift;
-    my $spec = ref $_[0] eq 'HASH' ? shift : undef;
+    my $spec = ref $_[0] eq 'HASH' ? shift : {
+        EXPORT => fetch_glob("${package}::EXPORT", "ARRAY"),
+        OK     => fetch_glob("${package}::EXPORT_OK", "ARRAY"),
+        TAGS   => fetch_glob("${package}::EXPORT_TAGS", "HASH"),
+    };
     my @names = @_;
 
     my %exports;
 
+    if (defined $spec->{EXPORT}) {
+        $exports{$_} = 1 foreach @{ $spec->{EXPORT} };
+    };
+
+    my %ok;
+
+    if (defined $spec->{OK}) {
+        $ok{$_} = 1 foreach @{ $spec->{OK} };
+    };
+
     while (my $name = shift @names) {
         if ($name =~ /^:(.*)$/) {
             my $tag = $1;
-            next unless defined $spec->{TAGS}{$tag};
-            $exports{$_} = 1 foreach @{ $spec->{TAGS}{$tag} };
+            if (defined $spec->{TAGS}{$tag}) {
+                push @names, @{ $spec->{TAGS}{$tag} };
+            };
         }
-        elsif (defined fetch_glob($name, 'CODE')) {
+        elsif ($ok{$name}) {
             $exports{$name} = 1;
+        }
+        else {
+            require Carp;
+            Carp::croak("$name is not exported by the $package module");
         };
     };
 
-    $EXPORT_DONE{$target}{$_} = 1 foreach keys %exports;
-
     foreach my $name (keys %exports) {
-        export_glob($target, "${package}::$name", 'CODE');
+        $name =~ s/^(\W)//;
+        my $type = $1 || '';
+        my @slots;
+        if ($type eq '&' or $type eq '') {
+            push @slots, 'CODE';
+        }
+        elsif ($type eq '$') {
+            push @slots, 'SCALAR';
+        }
+        elsif ($type eq '@') {
+            push @slots, 'ARRAY';
+        }
+        elsif ($type eq '%') {
+            push @slots, 'HASH';
+        }
+        elsif ($type eq '*') {
+            push @slots, qw(CODE SCALAR ARRAY HASH IO);
+        }
+        else {
+            require Carp;
+            Carp::croak("Can't export symbol $type$name");
+        };
+        foreach my $slot (@slots) {
+            if (defined export_glob($target, "${package}::$name", $slot)) {
+                $EXPORTED{$target}{$package}{$name}{$slot} = 1;
+            };
+        };
+    };
+};
+
+
+=item unexport_package( I<target>, I<package> )
+
+=cut
+
+sub unexport_package ($$) {
+    my ($target, $package) = @_;
+
+    if (defined $EXPORTED{$target}{$package}) {
+        foreach my $name (keys %{ $EXPORTED{$target}{$package} }) {
+            foreach my $slot (keys %{ $EXPORTED{$target}{$package}{$name} }) {
+                if ($slot eq 'CODE') {
+                    delete_sub("${target}::$name");
+                }
+                else {
+                    delete_glob("${target}::$name", $slot);
+                };
+            };
+        };
+        undef $EXPORTED{$target}{$package};
     };
 };
 
@@ -419,6 +481,9 @@ __END__
  export_glob( package : Str, name : Str, slot : Str ) : GlobRef
  delete_glob( name : Str, slots : Array[Str] ) : GlobRef
  delete_sub( name : Str ) : GlobRef
+ export_package( target : Str, package : Str, names : Array[Str] )
+ export_package( target : Str, package : Str, spec : HashRef, names : Array[Str] )
+ unexport_package( target : Str, package : Str )
                                                                    ]
 
 =end umlwiki
