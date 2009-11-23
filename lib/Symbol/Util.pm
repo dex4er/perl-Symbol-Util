@@ -395,15 +395,15 @@ The C<export_package> function can export symbols from an external package to
 an external package.  This function can also be used as a helper in C<import>
 method.
 
-    package My::Package;
-    sub myfunc { };
-    sub import {
-        my ($package, @names) = @_;
-        my $caller = caller();
-        return export_package($caller, $package, {
-            OK => [ qw( myfunc ) ],
-        }, @names);
-    };
+  package My::Package;
+  sub myfunc { };
+  sub import {
+      my ($package, @names) = @_;
+      my $caller = caller();
+      return export_package($caller, $package, {
+          OK => [ qw( myfunc ) ],
+      }, @names);
+  };
 
 All exported symbols are tracked and later can be removed with
 C<unexport_package> function.
@@ -419,14 +419,20 @@ sub export_package ($$@) {
         TAGS   => fetch_glob("${package}::EXPORT_TAGS", "HASH"),
     };
 
+    my @names = @_;
+
+    # support: use Package 3.14 qw();
+    return if @names == 1 and $names[0] eq '';
+
+    # default exports on empty list or if first element is negation
+    unshift @names, ":DEFAULT" if not @names or @names and $names[0] =~ /^!/;
+
     my @export = ref ($spec->{EXPORT} || '') eq 'ARRAY' ? @{ $spec->{EXPORT} } : ();
     my @export_ok = ref ($spec->{OK} || '') eq 'ARRAY' ? @{ $spec->{OK} } : ();
     my %export_tags = ref ($spec->{TAGS} || '') eq 'HASH' ? %{ $spec->{TAGS} } : ();
 
+    my %export = map { $_ => 1 } @export;
     my %export_ok = map { $_ => 1 } @export_ok;
-
-    my @names = @_;
-    unshift @names, ":DEFAULT" if (@names and $names[0] =~ /^!/);
 
     my %names;
 
@@ -440,10 +446,8 @@ sub export_package ($$@) {
             %names = map { $_ => 1 } grep { ! /$pattern/ } keys %names;
         }
         elsif ($name =~ /^(!?):DEFAULT$/) {
-            my ($neg, $tag) = ($1, $2);
-            if (defined $export_tags{$tag}) {
-                unshift @names, map { "${neg}$_" } @export;
-            };
+            my $neg = $1;
+            unshift @names, map { "${neg}$_" } @export;
         }
         elsif ($name =~ /^(!?):(.*)$/) {
             my ($neg, $tag) = ($1, $2);
@@ -455,7 +459,7 @@ sub export_package ($$@) {
             $name = $1;
             delete $names{$name};
         }
-        elsif (defined $export_ok{$name}) {
+        elsif (defined $export_ok{$name} or defined $export{$name}) {
             $names{$name} = 1;
         }
         else {
@@ -497,6 +501,24 @@ sub export_package ($$@) {
 
 
 =item unexport_package( I<target>, I<package> )
+
+Deletes symbols previously exported from I<package> to I<target> with
+C<export_package> function.  If the symbol was C<code> reference it is deleted
+with C<delete_sub> function.  Otherwise it is deleted with C<delete_glob>
+function with proper slot as an argument.
+
+  require YAML;
+  export_package(__PACKAGE__, "YAML", "dump");
+  unexport_package(__PACKAGE__, "YAML");
+
+This function can be used as a helper in C<unimport> method.
+
+  package My::Package;
+  sub unimport {
+      my ($package, @names) = @_;
+      my $caller = caller();
+      return unexport_package($caller, $package);
+  };
 
 =back
 
