@@ -27,7 +27,7 @@ Symbol::Util - Additional utils for Perl symbols manipulation
   export_package(__PACKAGE__, "YAML", "Dump");   # import YAML::Dump
   unexport_package(__PACKAGE, "YAML");   # remove imported symbols
 
-  no Symbol::Util;   # clean all symbols imported from Symbol::Util 
+  no Symbol::Util;   # clean all symbols imported from Symbol::Util
 
 =head1 DESCRIPTION
 
@@ -151,15 +151,15 @@ symbol does not already exists it will be created.  If the symbol name is
 unqualified it will be looked up in the calling package.  It is safe to use
 this function with C<use strict 'refs'>.
 
-If I<slot> is defined, reference to its value is returned.  The I<slot> can be
-one of the following strings: C<SCALAR>, C<ARRAY>, C<HASH>, C<CODE>, C<IO>,
-C<FORMAT>).
+If I<slot> argument is defined and this slot has defined value, reference to
+its value is returned.  The I<slot> argument can be one of the following
+strings: C<SCALAR>, C<ARRAY>, C<HASH>, C<CODE>, C<IO>, C<FORMAT>).
 
 This function is taken from Kurila, a dialect of Perl.
 
   my $caller = caller;
   *{ fetch_glob("${caller}::foo") } = sub { "this is foo" };
-  *{ fetch_glob("${caller}::bar") } = fetch_glob("${caller}::foo", "CODE");
+  my $coderef = fetch_glob("${caller}::foo", "CODE");
 
 =cut
 
@@ -171,7 +171,13 @@ sub fetch_glob ($;$) {
     };
 
     no strict 'refs';
-    return defined $slot ? *{ $name }{$slot} : \*{ $name };
+
+    if (defined $slot) {
+        return if $slot eq 'SCALAR' and not defined ${ *{ $name }{SCALAR} };
+        return *{ $name }{$slot};
+    };
+
+    return \*{ $name };
 };
 
 
@@ -200,10 +206,7 @@ sub list_glob_slots ($) {
 
     return undef if not defined *{ $name };
 
-    push @slots, 'SCALAR'
-        if defined *{ $name }{SCALAR} and defined ${ *{ $name }{SCALAR} };
-
-    foreach my $slot (qw( ARRAY HASH CODE IO )) {
+    foreach my $slot (qw( SCALAR ARRAY HASH CODE IO )) {
         push @slots, $slot if defined *{ $name }{$slot};
     };
 
@@ -591,10 +594,12 @@ L<Symbol>, L<Sub::Delete>, L<Exporter>.
 
 =head1 BUGS
 
-C<delete_glob> always deletes C<FORMAT> slot.
+C<fetch_glob> returns C<undef> value if C<SCALAR> slot contains C<undef> value.
 
 C<delete_glob> deletes C<SCALAR> slot if it exists and contains C<undef>
 value.
+
+C<delete_glob> always deletes C<FORMAT> slot.
 
 If you find the bug or want to implement new features, please report it at
 L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Symbol-Util>
