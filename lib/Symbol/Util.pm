@@ -363,7 +363,50 @@ sub delete_sub ($) {
 
 =item export_package( I<target> : Str, I<package> : Str, I<spec> : HashRef, I<names> : Array[Str] )
 
+Exports symbols from I<package> to I<target>.  If I<spec> is defined as hash
+reference, it contains the specification for exporter.  Otherwise the standard
+global variables of I<package> are used (C<@EXPORT>, C<@EXPORT_OK> and
+C<%EXPORT_TAGS>) to build the specification for exporter.  The optional list
+of I<names> defines an import list.
+
+The I<spec> is a reference to hash with following keys:
+
+=over
+
+=item EXPORT
+
+Contains the list of default imports.  It is the same as C<@EXPORT> variable.
+
+=item OK
+
+Contains the list of allowed imports.  It is the same as C<@EXPORT_OK>
+variable.
+
+=item TAGS
+
+Contains the hash with tags.  It is the same as C<%EXPORT_TAGS> variable.
+
 =back
+
+See L<Exporter> documentation for explanation of these global variables and
+list of I<names>.
+
+The C<export_package> function can export symbols from an external package to
+an external package.  This function can also be used as a helper in C<import>
+method.
+
+    package My::Package;
+    sub myfunc { };
+    sub import {
+        my ($package, @names) = @_;
+        my $caller = caller();
+        return export_package($caller, $package, {
+            OK => [ qw( myfunc ) ],
+        }, @names);
+    };
+
+All exported symbols are tracked and later can be removed with
+C<unexport_package> function.
 
 =cut
 
@@ -375,29 +418,45 @@ sub export_package ($$@) {
         OK     => fetch_glob("${package}::EXPORT_OK", "ARRAY"),
         TAGS   => fetch_glob("${package}::EXPORT_TAGS", "HASH"),
     };
+
+    my @export = ref ($spec->{EXPORT} || '') eq 'ARRAY' ? @{ $spec->{EXPORT} } : ();
+    my @export_ok = ref ($spec->{OK} || '') eq 'ARRAY' ? @{ $spec->{OK} } : ();
+    my %export_tags = ref ($spec->{TAGS} || '') eq 'HASH' ? %{ $spec->{TAGS} } : ();
+
+    my %export_ok = map { $_ => 1 } @export_ok;
+
     my @names = @_;
+    unshift @names, ":DEFAULT" if (@names and $names[0] =~ /^!/);
 
-    my %exports;
-
-    if (defined $spec->{EXPORT}) {
-        $exports{$_} = 1 foreach @{ $spec->{EXPORT} };
-    };
-
-    my %ok;
-
-    if (defined $spec->{OK}) {
-        $ok{$_} = 1 foreach @{ $spec->{OK} };
-    };
+    my %names;
 
     while (my $name = shift @names) {
-        if ($name =~ /^:(.*)$/) {
-            my $tag = $1;
-            if (defined $spec->{TAGS}{$tag}) {
-                push @names, @{ $spec->{TAGS}{$tag} };
+        if ($name =~ m{^/(.*)/$}) {
+            my $pattern = $1;
+            $names{$_} = 1 foreach grep { /$pattern/ } (@export, @export_ok);
+        }
+        elsif ($name =~ m{^!/(.*)/$}) {
+            my $pattern = $1;
+            %names = map { $_ => 1 } grep { ! /$pattern/ } keys %names;
+        }
+        elsif ($name =~ /^(!?):DEFAULT$/) {
+            my ($neg, $tag) = ($1, $2);
+            if (defined $export_tags{$tag}) {
+                unshift @names, map { "${neg}$_" } @export;
             };
         }
-        elsif ($ok{$name}) {
-            $exports{$name} = 1;
+        elsif ($name =~ /^(!?):(.*)$/) {
+            my ($neg, $tag) = ($1, $2);
+            if (defined $export_tags{$tag}) {
+                unshift @names, map { "${neg}$_" } @{ $export_tags{$tag} };
+            };
+        }
+        elsif ($name =~ /^!(.*)$/) {
+            $name = $1;
+            delete $names{$name};
+        }
+        elsif (defined $export_ok{$name}) {
+            $names{$name} = 1;
         }
         else {
             require Carp;
@@ -405,7 +464,7 @@ sub export_package ($$@) {
         };
     };
 
-    foreach my $name (keys %exports) {
+    foreach my $name (keys %names) {
         $name =~ s/^(\W)//;
         my $type = $1 || '';
         my @slots;
@@ -439,6 +498,8 @@ sub export_package ($$@) {
 
 =item unexport_package( I<target>, I<package> )
 
+=back
+
 =cut
 
 sub unexport_package ($$) {
@@ -455,7 +516,7 @@ sub unexport_package ($$) {
                 };
             };
         };
-        undef $EXPORTED{$target}{$package};
+        delete $EXPORTED{$target}{$package};
     };
 };
 
