@@ -206,7 +206,10 @@ sub list_glob_slots ($) {
 
     return undef if not defined *{ $name };
 
-    foreach my $slot (qw( SCALAR ARRAY HASH CODE IO )) {
+    push @slots, 'SCALAR'
+        if defined *{ $name }{SCALAR} and defined ${ *{ $name }{SCALAR} };
+
+    foreach my $slot (qw( ARRAY HASH CODE IO )) {
         push @slots, $slot if defined *{ $name }{$slot};
     };
 
