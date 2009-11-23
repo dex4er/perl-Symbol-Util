@@ -8,7 +8,7 @@ use Symbol ();
 
 $SIG{__WARN__} = sub { local $Carp::CarpLevel = 1; Carp::confess("Warning: ", @_) };
 
-use Test::More tests => 20;
+use Test::More tests => 38;
 
 {
     package Symbol::Util::Test10::NoImport;
@@ -45,6 +45,17 @@ my @functions = qw(
 is( $@, '', 'use Symbol::Util ":all"' );
 is_deeply( [ sort keys %{*Symbol::Util::Test10::AllImport::} ], [ @functions ], 'all functions imported' );
 
+{
+    package Symbol::Util::Test10::AllImport;
+
+    eval q{
+        Symbol::Util->unimport;
+    };
+};
+
+is( $@, '', 'no Symbol::Util [1]' );
+is_deeply( [ sort keys %{*Symbol::Util::Test10::AllImport::} ], [], 'all functions unimported [1]' );
+
 foreach my $function (@functions) {
     {
         eval qq{
@@ -56,6 +67,25 @@ foreach my $function (@functions) {
     };
 
     is( $@, '', "use Symbol::Util \"$function\"" );
-    no strict 'refs';
-    is_deeply( [ sort keys %{ *{"Symbol::Util::Test10::SomeImport::${function}::"} } ], [ $function ], "$function function imported" );
+    {
+        no strict 'refs';
+        is_deeply( [ sort keys %{ *{"Symbol::Util::Test10::SomeImport::${function}::"} } ], [ $function ], "$function function imported" );
+    };
+
+    {
+        package Symbol::Util::Test10::AllImport;
+
+        eval qq{
+            package Symbol::Util::Test10::SomeImport::$function;
+
+            Symbol::Util->unimport;
+        };
+    };
+
+    is( $@, '', 'no Symbol::Util [2]' );
+    {
+        no strict 'refs';
+        is_deeply( [ sort keys %{*Symbol::Util::Test10::AllImport::} ], [], 'all functions unimported [2]' );
+    };
+
 };
