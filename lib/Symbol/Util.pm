@@ -12,7 +12,7 @@ Symbol::Util - Additional utils for Perl symbols manipulation
 
   my $caller = caller;
   *{ fetch_glob("${caller}::foo") } = sub { "this is foo" };
-  *{ fetch_glob("${caller}::bar") } = fetch_glob("${caller}::foo", "CODE");
+  my $coderef = fetch_glob("${caller}::bar", "CODE");
   sub baz { 42; }
   export_glob($caller, "baz");
 
@@ -22,6 +22,12 @@ Symbol::Util - Additional utils for Perl symbols manipulation
 
   use constant PI => 3.14159265;
   delete_sub "PI";   # remove constant from public API
+
+  require YAML;
+  export_package(__PACKAGE__, "YAML", "Dump");   # import YAML::Dump
+  unexport_package(__PACKAGE, "YAML");   # remove imported symbols
+
+  no Symbol::Util;   # clean all symbols imported from Symbol::Util 
 
 =head1 DESCRIPTION
 
@@ -503,9 +509,12 @@ sub export_package ($$@) {
 =item unexport_package( I<target>, I<package> )
 
 Deletes symbols previously exported from I<package> to I<target> with
-C<export_package> function.  If the symbol was C<code> reference it is deleted
+C<export_package> function.  If the symbol was C<CODE> reference it is deleted
 with C<delete_sub> function.  Otherwise it is deleted with C<delete_glob>
 function with proper slot as an argument.
+
+Deleting with C<delete_sub> function means that this symbol is not available
+via class API as an object method.
 
   require YAML;
   export_package(__PACKAGE__, "YAML", "dump");
@@ -519,6 +528,11 @@ This function can be used as a helper in C<unimport> method.
       my $caller = caller();
       return unexport_package($caller, $package);
   };
+
+  package main;
+  use My::Package qw(something);
+  no My::Package;
+  main->something;   # Can't locate object method
 
 =back
 
@@ -573,7 +587,7 @@ __END__
 
 =head1 SEE ALSO
 
-L<Symbol>, L<Sub::Delete>.
+L<Symbol>, L<Sub::Delete>, L<Exporter>.
 
 =head1 BUGS
 
@@ -582,7 +596,8 @@ C<delete_glob> always deletes C<FORMAT> slot.
 C<delete_glob> deletes C<SCALAR> slot if it exists and contains C<undef>
 value.
 
-If you find the bug, please report it.
+If you find the bug or want to implement new features, please report it at
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Symbol-Util>
 
 =for readme continue
 

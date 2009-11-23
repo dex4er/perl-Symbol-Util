@@ -8,7 +8,7 @@ use Symbol ();
 
 $SIG{__WARN__} = sub { local $Carp::CarpLevel = 1; Carp::confess("Warning: ", @_) };
 
-use Test::More tests => 18;
+use Test::More tests => 20;
 
 {
     package Symbol::Util::Test10::NoImport;
@@ -30,6 +30,7 @@ my @functions = qw(
     fetch_glob
     list_glob_slots
     stash
+    unexport_package
 );
 
 {
