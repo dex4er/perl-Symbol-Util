@@ -166,9 +166,7 @@ This function is taken from Kurila, a dialect of Perl.
 sub fetch_glob ($;$) {
     my ($name, $slot) = @_;
 
-    if ($name !~ /::/) {
-        $name = caller() . '::' . $name;
-    };
+    $name = caller() . "::$name" if $name !~ /::/;
 
     no strict 'refs';
 
@@ -196,9 +194,7 @@ The C<SCALAR> slot is used only if it constains defined value.
 sub list_glob_slots ($) {
     my ($name) = @_;
 
-    if ($name !~ /::/) {
-        $name = caller() . '::' . $name;
-    };
+    $name = caller() . "::$name" if $name !~ /::/;
 
     my @slots;
 
@@ -217,12 +213,12 @@ sub list_glob_slots ($) {
 };
 
 
-=item export_glob( I<package>, I<name> : Str ) : GlobRef
+=item export_glob( I<target>, I<name> : Str ) : GlobRef
 
-=item export_glob( I<package>, I<name> : Str, I<slot> : Str ) : Ref
+=item export_glob( I<target>, I<name> : Str, I<slots> : Array ) : Ref
 
-Exports a glob I<name> to the I<package>.  Optionaly exports only one slot
-of the glob.
+Exports a glob I<name> to the I<target> package.  Optionaly exports only
+specified slots of the glob.
 
   sub my_function { ... };
   sub import {
@@ -232,26 +228,30 @@ of the glob.
 
 =cut
 
-sub export_glob ($$;$) {
-    my ($package, $name, $slot) = @_;
+sub export_glob ($$;@) {
+    my ($target, $name, @slots) = @_;
 
-    if ($name !~ /::/) {
-        $name = caller() . '::' . $name;
-    };
+    $name = caller() . "::$name" if $name !~ /::/;
+    @slots = qw( SCALAR ARRAY HASH CODE IO ) unless @slots;
 
-    (my $srcpackage = $name) =~ s/::([^:]*)$//;
-    my $srcsubname = $1;
+    (my $package = $name) =~ s/::([^:]*)$//;
+    my $subname = $1;
 
-    my $dstname = $package . "::$srcsubname";
+    my $targetname = "${target}::$subname";
 
     no strict 'refs';
 
-    return if defined $slot
-              ? ! defined *{ $name }{$slot}
-              : ! defined *{ $name } ;
+    return if not defined *{ $name };
 
-    *{ $dstname } = defined $slot ? *{ $name }{$slot} : *{ $name };
-    return \*{ $dstname };
+    my $defined;
+    foreach my $slot (@slots) {
+        next if $slot eq 'SCALAR' and not defined ${ *{ $name }{$slot} };
+        next if not defined *{ $name }{$slot}; 
+        *{ $targetname } = *{ $name }{$slot};
+        $defined = 1;
+    };
+
+    return $defined ? \*{ $targetname } : undef;
 };
 
 
@@ -276,9 +276,7 @@ Function returns the glob reference if there are any slots defined.
 sub delete_glob ($;@) {
     my ($name, @slots) = @_;
 
-    if ($name !~ /::/) {
-        $name = caller() . '::' . $name;
-    };
+    $name = caller() . "::$name" if $name !~ /::/;
 
     (my $package = $name) =~ s/::([^:]*)$//;
     my $subname = $1;
@@ -340,9 +338,7 @@ than <CODE> slot.
 sub delete_sub ($) {
     my ($name) = @_;
 
-    if ($name !~ /::/) {
-        $name = caller() . '::' . $name;
-    };
+    $name = caller() . "::$name" if $name !~ /::/;
 
     (my $package = $name) =~ s/::([^:]*)$//;
     my $subname = $1;
@@ -565,8 +561,6 @@ sub unexport_package ($$) {
 1;
 
 
-__END__
-
 =begin umlwiki
 
 = Class Diagram =
@@ -580,7 +574,7 @@ __END__
  fetch_glob( name : Str, slot : Str ) : Ref
  list_glob_slots( name : Str ) : Array
  export_glob( package : Str, name : Str ) : GlobRef
- export_glob( package : Str, name : Str, slot : Str ) : GlobRef
+ export_glob( package : Str, name : Str, slots : Array[Str] ) : GlobRef
  delete_glob( name : Str, slots : Array[Str] ) : GlobRef
  delete_sub( name : Str ) : GlobRef
  export_package( target : Str, package : Str, names : Array[Str] )
