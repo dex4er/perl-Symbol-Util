@@ -204,7 +204,7 @@ sub list_glob_slots ($) {
 
     no strict 'refs';
 
-    return undef if not defined *{ $name };
+    return if not defined *{ $name };
 
     push @slots, 'SCALAR'
         if defined *{ $name }{SCALAR} and defined ${ *{ $name }{SCALAR} };

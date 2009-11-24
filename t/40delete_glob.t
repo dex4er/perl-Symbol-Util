@@ -7,7 +7,7 @@ use Carp ();
 
 $SIG{__WARN__} = sub { local $Carp::CarpLevel = 1; Carp::confess("Warning: ", @_) };
 
-use Test::More tests => 62;
+use Test::More tests => 63;
 
 use Symbol::Util 'delete_glob';
 
@@ -91,9 +91,11 @@ is_deeply( \%Symbol::Util::Test40::BAR, {"hash"=>1}, '%Symbol::Util::Test40::BAR
 is( eval { Symbol::Util::Test40::BAR() }, 'code', 'Symbol::Util::Test40::BAR() is ok [3]' );
 ok( ! fileno Symbol::Util::Test40::BAR, '*Symbol::Util::Test40::BAR{IO} is ok [3]' );
 
-ok( ! defined delete_glob("Symbol::Util::Test40::BAR"), 'delete_glob("Symbol::Util::Test40::BAR")' );
+ok( ! defined delete_glob("Symbol::Util::Test40::BAR"), 'delete_glob("Symbol::Util::Test40::BAR") [1]' );
 ok( ! defined $Symbol::Util::Test40::BAR, '$Symbol::Util::Test40::BAR is ok [4]' );
 ok( ! defined @Symbol::Util::Test40::BAR, '@Symbol::Util::Test40::BAR is ok [4]' );
 ok( ! defined %Symbol::Util::Test40::BAR, '%Symbol::Util::Test40::BAR is ok [4]' );
 ok( ! eval { Symbol::Util::Test40::BAR() }, 'Symbol::Util::Test40::BAR() is ok [4]' );
 ok( ! fileno Symbol::Util::Test40::BAR, '*Symbol::Util::Test40::BAR{IO} is ok [4]' );
+
+ok( ! defined delete_glob("Symbol::Util::Test40::BAR"), 'delete_glob("Symbol::Util::Test40::BAR") [2]' );
