@@ -9,7 +9,7 @@ $SIG{__WARN__} = sub { local $Carp::CarpLevel = 1; Carp::confess("Warning: ", @_
 
 use Test::More tests => 11;
 
-use Symbol::Util;
+use Symbol::Util 'fetch_glob';
 
 {
     package Symbol::Util::Test20;
@@ -18,17 +18,17 @@ use Symbol::Util;
     our $scalar = "scalar";
 };
 
-is( *{Symbol::Util::fetch_glob("Symbol::Util::Test20::function")}, '*Symbol::Util::Test20::function', 'fetch_glob("Symbol::Util::Test20::function") is *Symbol::Util::Test20::function' );
-is( ref Symbol::Util::fetch_glob("Symbol::Util::Test20::function", "CODE"), 'CODE', 'ref fetch_glob("Symbol::Util::Test20::function", "CODE") is CODE' );
-ok( ! defined Symbol::Util::fetch_glob("Symbol::Util::Test20::function", "SCALAR"), 'not defined fetch_glob("Symbol::Util::Test20::function", "SCALAR")' );
+is( *{fetch_glob("Symbol::Util::Test20::function")}, '*Symbol::Util::Test20::function', 'fetch_glob("Symbol::Util::Test20::function") is *Symbol::Util::Test20::function' );
+is( ref fetch_glob("Symbol::Util::Test20::function", "CODE"), 'CODE', 'ref fetch_glob("Symbol::Util::Test20::function", "CODE") is CODE' );
+ok( ! defined fetch_glob("Symbol::Util::Test20::function", "SCALAR"), 'not defined fetch_glob("Symbol::Util::Test20::function", "SCALAR")' );
 
-is( *{Symbol::Util::fetch_glob("Symbol::Util::Test20::scalar")}, '*Symbol::Util::Test20::scalar', 'fetch_glob("Symbol::Util::Test20::scalar") is *Symbol::Util::Test20::scalar' );
-is( ref Symbol::Util::fetch_glob("Symbol::Util::Test20::scalar", "SCALAR"), 'SCALAR', 'ref fetch_glob("Symbol::Util::Test20::scalar", "SCALAR") is SCALAR' );
-ok( ! defined Symbol::Util::fetch_glob("Symbol::Util::Test20::scalar", "CODE"), 'not defined fetch_glob("Symbol::Util::Test20::scalar", "CODE")' );
+is( *{fetch_glob("Symbol::Util::Test20::scalar")}, '*Symbol::Util::Test20::scalar', 'fetch_glob("Symbol::Util::Test20::scalar") is *Symbol::Util::Test20::scalar' );
+is( ref fetch_glob("Symbol::Util::Test20::scalar", "SCALAR"), 'SCALAR', 'ref fetch_glob("Symbol::Util::Test20::scalar", "SCALAR") is SCALAR' );
+ok( ! defined fetch_glob("Symbol::Util::Test20::scalar", "CODE"), 'not defined fetch_glob("Symbol::Util::Test20::scalar", "CODE")' );
 
-is( *{Symbol::Util::fetch_glob("notexists")}, '*main::notexists', 'fetch_glob("notexists") is *main::notexists' );
-ok( ! defined Symbol::Util::fetch_glob("notexists", "SCALAR"), 'not defined fetch_glob("notexists", "SCALAR")' );
-ok( ! defined Symbol::Util::fetch_glob("notexists", "CODE"), 'not defined fetch_glob("notexists", "CODE")' );
+is( *{fetch_glob("notexists")}, '*main::notexists', 'fetch_glob("notexists") is *main::notexists' );
+ok( ! defined fetch_glob("notexists", "SCALAR"), 'not defined fetch_glob("notexists", "SCALAR")' );
+ok( ! defined fetch_glob("notexists", "CODE"), 'not defined fetch_glob("notexists", "CODE")' );
 
 {
     package Symbol::Util::Test20;

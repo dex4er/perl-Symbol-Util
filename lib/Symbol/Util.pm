@@ -356,7 +356,6 @@ sub delete_sub ($) {
     foreach my $slot (list_glob_slots($name)) {
         $backup{$slot} = fetch_glob($name, $slot);
     };
-    undef $stash->{$subname};
 
     *{ fetch_glob($name) } = $backup{CODE};
     delete $backup{CODE};
