@@ -311,8 +311,9 @@ sub delete_glob ($;@) {
 
 =item delete_sub( I<name> : Str ) : Maybe[GlobRef]
 
-Deletes the specified subroutine name from class API.  It means that this
-subroutine will be no longer available as the class method.
+Deletes (or hides) the specified subroutine name from class API.  It means
+that this subroutine will be no longer available as the class method.  The
+purpose of this function is the same as L<namespace::clean> pragma has.
 
 Function returns the glob reference if there are any other slots still defined
 than <CODE> slot.
@@ -590,7 +591,7 @@ sub unexport_package ($$) {
 
 =head1 SEE ALSO
 
-L<Symbol>, L<Sub::Delete>, L<Exporter>.
+L<Symbol>, L<Sub::Delete>, L<namespace::clean>, L<Exporter>.
 
 =head1 BUGS
 
