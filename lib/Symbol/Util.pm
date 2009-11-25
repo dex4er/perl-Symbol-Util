@@ -34,11 +34,19 @@ Symbol::Util - Additional utils for Perl symbols manipulation
 This module provides a set of additional functions useful for Perl
 symbols manipulation.
 
-I.e. C<delete_glob> function allows to delete specific slot of
+C<stash> and C<fetch_glob> functions gets stash or glob without need to use
+C<no strict 'refs'>.
+
+C<delete_glob> function allows to delete specific slot of
 symbol name without deleting others.
 
-C<delete_sub> removes the function from class API.  This function won't be
+C<delete_sub> removes the symbol from class API.  This symbol won't be
 available as an object method.
+
+C<export_package> works like L<Exporter> module and allows to export symbols
+from one package to other.
+
+C<unexport_package> allows to delete previously exported symbols.
 
 =for readme stop
 
@@ -118,22 +126,6 @@ This function is taken from Kurila, a dialect of Perl.
 
   print join "\n", keys %{ Symbol::stash("main") };
 
-=item delete_glob( I<name> : Str, I<slots> : Array[Str] ) : Maybe[GlobRef]
-
-Deletes the specified symbol name if I<slots> are not specified, or deletes
-the specified slots in symbol name (could be one or more of the following
-strings: C<SCALAR>, C<ARRAY>, C<HASH>, C<CODE>, C<IO>, C<FORMAT>).
-
-Function returns the glob reference if there are any slots defined.
-
-  our $FOO = 1;
-  sub FOO { "bar" };
-
-  delete_glob("FOO", "CODE");
-
-  print $FOO;  # prints "1"
-  FOO();       # error: sub not found
-
 =cut
 
 sub stash ($) {
@@ -179,7 +171,7 @@ sub fetch_glob ($;$) {
 };
 
 
-=item list_glob_slots( I<name> ) : Array
+=item list_glob_slots( I<name> ) : Maybe[Array]
 
 Returns a list of slot names for glob with specified name which have defined
 value.  If the glob is undefined, the C<undef> value is returned.  If the glob
@@ -367,9 +359,9 @@ sub delete_sub ($) {
 };
 
 
-=item export_package( I<target> : Str, I<package> : Str, I<names> : Array[Str] )
+=item export_package( I<target> : Str, I<package> : Str, I<names> : Array[Str] ) : Bool
 
-=item export_package( I<target> : Str, I<package> : Str, I<spec> : HashRef, I<names> : Array[Str] )
+=item export_package( I<target> : Str, I<package> : Str, I<spec> : HashRef, I<names> : Array[Str] ) : Bool
 
 Exports symbols from I<package> to I<target>.  If I<spec> is defined as hash
 reference, it contains the specification for exporter.  Otherwise the standard
@@ -416,6 +408,8 @@ method.
 All exported symbols are tracked and later can be removed with
 C<unexport_package> function.
 
+The function returns true value if there were no errors.
+
 =cut
 
 sub export_package ($$@) {
@@ -430,7 +424,7 @@ sub export_package ($$@) {
     my @names = @_;
 
     # support: use Package 3.14 qw();
-    return if @names == 1 and $names[0] eq '';
+    return 1 if @names == 1 and $names[0] eq '';
 
     # default exports on empty list or if first element is negation
     unshift @names, ":DEFAULT" if not @names or @names and $names[0] =~ /^!/;
@@ -506,11 +500,11 @@ sub export_package ($$@) {
         };
     };
 
-    return;
+    return 1;
 };
 
 
-=item unexport_package( I<target>, I<package> )
+=item unexport_package( I<target>, I<package> ) : Bool
 
 Deletes symbols previously exported from I<package> to I<target> with
 C<export_package> function.  If the symbol was C<CODE> reference it is deleted
@@ -538,6 +532,8 @@ This function can be used as a helper in C<unimport> method.
   no My::Package;
   main->something;   # Can't locate object method
 
+The function returns true value if there were no errors.
+
 =back
 
 =cut
@@ -561,7 +557,7 @@ sub unexport_package ($$) {
         delete $EXPORTED{$target}{$package};
     };
 
-    return;
+    return 1;
 };
 
 
@@ -584,9 +580,9 @@ sub unexport_package ($$) {
  export_glob( package : Str, name : Str, slots : Array[Str] ) : GlobRef
  delete_glob( name : Str, slots : Array[Str] ) : GlobRef
  delete_sub( name : Str ) : GlobRef
- export_package( target : Str, package : Str, names : Array[Str] )
- export_package( target : Str, package : Str, spec : HashRef, names : Array[Str] )
- unexport_package( target : Str, package : Str )
+ export_package( target : Str, package : Str, names : Array[Str] ) : Bool
+ export_package( target : Str, package : Str, spec : HashRef, names : Array[Str] ) : Bool
+ unexport_package( target : Str, package : Str ) : Bool
                                                                    ]
 
 =end umlwiki
