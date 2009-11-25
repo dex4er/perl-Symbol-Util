@@ -7,7 +7,7 @@ use Carp ();
 
 $SIG{__WARN__} = sub { local $Carp::CarpLevel = 1; Carp::confess("Warning: ", @_) };
 
-use Test::More tests => 12;
+use Test::More tests => 108;
 
 use Symbol::Util 'export_package', 'unexport_package';
 
@@ -188,14 +188,14 @@ export_package("Symbol::Util::Test80::Target8", "Symbol::Util::Test80::Source1",
 pass( 'export_package("Symbol::Util::Test80::Target8", "Symbol::Util::Test80::Source1")' );
 
 is( $Symbol::Util::Test80::Target8::BAZ, 'BAZ', '$Symbol::Util::Test80::Target8::BAZ is ok [1]' );
-is( eval { Symbol::Util::Test80::Target8->BAZ }, 'BAZ', 'Symbol::Util::Test80::Target8->BAZ is ok [1]' );
 is( eval { &Symbol::Util::Test80::Target8::BAZ }, 'BAZ', '&Symbol::Util::Test80::Target8::BAZ is ok [1]' );
+is( eval { Symbol::Util::Test80::Target8->BAZ }, 'BAZ', 'Symbol::Util::Test80::Target8->BAZ is ok [1]' );
 
 unexport_package("Symbol::Util::Test80::Target8", "Symbol::Util::Test80::Source1");
 pass( 'unexport_package("Symbol::Util::Test80::Target8", "Symbol::Util::Test80::Source1")' );
 
 ok( ! defined $Symbol::Util::Test80::Target8::BAZ, '$Symbol::Util::Test80::Target8::BAZ is ok [2]' );
-ok( ! defined eval { &Symbol::Util::Test80::Target8::BAZ }, '&Symbol::Util::Test80::Target8::BAZ is ok [2]' );
+is( eval { &Symbol::Util::Test80::Target8::BAZ }, 'BAZ', '&Symbol::Util::Test80::Target8::BAZ is ok [2]' );
 ok( ! defined eval { Symbol::Util::Test80::Target8->BAZ }, 'Symbol::Util::Test80::Target8->BAZ is ok [2]' );
 
 

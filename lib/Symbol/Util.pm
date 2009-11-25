@@ -246,7 +246,7 @@ sub export_glob ($$;@) {
     my $defined;
     foreach my $slot (@slots) {
         next if $slot eq 'SCALAR' and not defined ${ *{ $name }{$slot} };
-        next if not defined *{ $name }{$slot}; 
+        next if not defined *{ $name }{$slot};
         *{ $targetname } = *{ $name }{$slot};
         $defined = 1;
     };
@@ -505,7 +505,7 @@ sub export_package ($$@) {
             };
         };
     };
-    
+
     return;
 };
 
@@ -547,7 +547,9 @@ sub unexport_package ($$) {
 
     if (defined $EXPORTED{$target}{$package}) {
         foreach my $name (keys %{ $EXPORTED{$target}{$package} }) {
-            foreach my $slot (keys %{ $EXPORTED{$target}{$package}{$name} }) {
+            # CODE slot have to be the last one
+            foreach my $slot ( qw( SCALAR ARRAY HASH IO CODE ) ) {
+                next unless exists $EXPORTED{$target}{$package}{$name}{$slot};
                 if ($slot eq 'CODE') {
                     delete_sub("${target}::$name");
                 }
@@ -558,7 +560,7 @@ sub unexport_package ($$) {
         };
         delete $EXPORTED{$target}{$package};
     };
-    
+
     return;
 };
 
