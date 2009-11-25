@@ -492,7 +492,7 @@ sub export_package ($$@) {
             push @slots, 'HASH';
         }
         elsif ($type eq '*') {
-            push @slots, qw(CODE SCALAR ARRAY HASH IO);
+            push @slots, 'IO';
         }
         else {
             require Carp;
@@ -504,6 +504,8 @@ sub export_package ($$@) {
             };
         };
     };
+    
+    return;
 };
 
 
@@ -555,6 +557,8 @@ sub unexport_package ($$) {
         };
         delete $EXPORTED{$target}{$package};
     };
+    
+    return;
 };
 
 
