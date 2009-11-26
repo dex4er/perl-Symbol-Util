@@ -7,7 +7,7 @@ use Carp ();
 
 $SIG{__WARN__} = sub { local $Carp::CarpLevel = 1; Carp::confess("Warning: ", @_) };
 
-use Test::More tests => 19;
+use Test::More tests => 24;
 
 use Symbol::Util 'delete_sub';
 
@@ -45,3 +45,12 @@ is_deeply( \%Symbol::Util::Test50::FOO, {"hash"=>1}, '%Symbol::Util::Test50::FOO
 ok( fileno Symbol::Util::Test50::FOO, '*Symbol::Util::Test50::FOO{IO} is ok [2]' );
 
 ok( ! defined delete_sub("Symbol::Util::Test50::FOO"), 'delete_sub("Symbol::Util::Test50::FOO [2]")' );
+
+*FOO = sub { "code" };
+is( eval { main->FOO }, 'code', 'main->FOO is ok [1]' );
+is( eval { &main::FOO }, 'code', '&main::FOO is ok [1]' );
+
+ok( ! defined delete_sub("::FOO"), 'delete_sub("::FOO")' );
+
+ok( ! defined eval { main->FOO }, 'main->FOO is ok [2]' );
+is( eval { &main::FOO }, 'code', '&main::FOO is ok [2]' );

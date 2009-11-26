@@ -158,7 +158,7 @@ This function is taken from Kurila, a dialect of Perl.
 sub fetch_glob ($;$) {
     my ($name, $slot) = @_;
 
-    $name = caller() . "::$name" if $name !~ /::/;
+    $name = caller() . "::$name" unless $name =~ /::/;
 
     no strict 'refs';
 
@@ -186,13 +186,13 @@ The C<SCALAR> slot is used only if it constains defined value.
 sub list_glob_slots ($) {
     my ($name) = @_;
 
-    $name = caller() . "::$name" if $name !~ /::/;
-
-    my @slots;
+    $name = caller() . "::$name" unless $name =~ /::/;
 
     no strict 'refs';
 
     return if not defined *{ $name };
+
+    my @slots;
 
     push @slots, 'SCALAR'
         if defined *{ $name }{SCALAR} and defined ${ *{ $name }{SCALAR} };
@@ -223,17 +223,16 @@ specified slots of the glob.
 sub export_glob ($$;@) {
     my ($target, $name, @slots) = @_;
 
-    $name = caller() . "::$name" if $name !~ /::/;
+    $name = caller() . "::$name" unless $name =~ /::/;
+    (my $subname = $name) =~ s/^(.*):://;
+
     @slots = qw( SCALAR ARRAY HASH CODE IO ) unless @slots;
-
-    (my $package = $name) =~ s/::([^:]*)$//;
-    my $subname = $1;
-
-    my $targetname = "${target}::$subname";
 
     no strict 'refs';
 
     return if not defined *{ $name };
+
+    my $targetname = "${target}::$subname";
 
     my $defined;
     foreach my $slot (@slots) {
@@ -268,10 +267,9 @@ Function returns the glob reference if there are any slots defined.
 sub delete_glob ($;@) {
     my ($name, @slots) = @_;
 
-    $name = caller() . "::$name" if $name !~ /::/;
-
-    (my $package = $name) =~ s/::([^:]*)$//;
-    my $subname = $1;
+    $name = caller() . "::$name" unless $name =~ /::/;
+    $name =~ /^(.*)::([^:]*)/;
+    my ($package, $subname) = ($1, $2);  ## no critic qw(ProhibitCaptureWithoutTest)
 
     my $stash = stash($package);
 
@@ -331,10 +329,9 @@ than <CODE> slot.
 sub delete_sub ($) {
     my ($name) = @_;
 
-    $name = caller() . "::$name" if $name !~ /::/;
-
-    (my $package = $name) =~ s/::([^:]*)$//;
-    my $subname = $1;
+    $name = caller() . "::$name" unless $name =~ /::/;
+    $name =~ /^(.*)::([^:]*)/;
+    my ($package, $subname) = ($1, $2);  ## no critic qw(ProhibitCaptureWithoutTest)
 
     return if not defined fetch_glob($name, 'CODE');
 
@@ -476,7 +473,7 @@ sub export_package ($$@) {
 
     foreach my $name (keys %names) {
         $name =~ s/^(\W)//;
-        my $type = $1 || '';
+        my $type = $1 || '';  ## no critic qw(ProhibitCaptureWithoutTest)
         my @slots;
         if ($type eq '&' or $type eq '') {
             push @slots, 'CODE';
