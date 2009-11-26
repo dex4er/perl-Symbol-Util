@@ -26,7 +26,7 @@ foreach my $slot (qw{ SCALAR ARRAY HASH CODE IO }) {
 };
 
 is( eval { Symbol::Util::Test50->FOO }, 'code', 'Symbol::Util::Test50->FOO is ok [1]' );
-is( eval { Symbol::Util::Test50::FOO() }, 'code', 'Symbol::Util::Test50::FOO() is ok [1]' );
+is( eval { &Symbol::Util::Test50::FOO }, 'code', '&Symbol::Util::Test50::FOO is ok [1]' );
 is( $Symbol::Util::Test50::FOO, "scalar", '$Symbol::Util::Test50::FOO is ok [1]' );
 is_deeply( \@Symbol::Util::Test50::FOO, ["array"], '@Symbol::Util::Test50::FOO is ok [1]' );
 is_deeply( \%Symbol::Util::Test50::FOO, {"hash"=>1}, '%Symbol::Util::Test50::FOO is ok [1]' );
@@ -38,7 +38,7 @@ ok( fileno Symbol::Util::Test50::FOO, '*Symbol::Util::Test50::FOO{IO} is ok [1]'
 };
 
 ok( ! eval { Symbol::Util::Test50->FOO }, 'Can\'t locate method Symbol::Util::Test50->FOO' );
-is( eval { Symbol::Util::Test50::FOO() }, 'code', 'Symbol::Util::Test50::FOO() is ok [2]' );
+is( eval { &Symbol::Util::Test50::FOO }, 'code', '&Symbol::Util::Test50::FOO is ok [2]' );
 is( $Symbol::Util::Test50::FOO, "scalar", '$Symbol::Util::Test50::FOO is ok [2]' );
 is_deeply( \@Symbol::Util::Test50::FOO, ["array"], '@Symbol::Util::Test50::FOO is ok [2]' );
 is_deeply( \%Symbol::Util::Test50::FOO, {"hash"=>1}, '%Symbol::Util::Test50::FOO is ok [2]' );

@@ -27,35 +27,35 @@ foreach my $slot (qw{ SCALAR ARRAY HASH CODE IO }) {
 is( $Symbol::Util::Test40::FOO, "scalar", '$Symbol::Util::Test40::FOO is ok [1]' );
 is_deeply( \@Symbol::Util::Test40::FOO, ["array"], '@Symbol::Util::Test40::FOO is ok [1]' );
 is_deeply( \%Symbol::Util::Test40::FOO, {"hash"=>1}, '%Symbol::Util::Test40::FOO is ok [1]' );
-is( Symbol::Util::Test40::FOO(), 'code', 'Symbol::Util::Test40::FOO() is ok [1]' );
+is( eval { &Symbol::Util::Test40::FOO }, 'code', '&Symbol::Util::Test40::FOO is ok [1]' );
 ok( fileno Symbol::Util::Test40::FOO, '*Symbol::Util::Test40::FOO{IO} is ok [1]' );
 
 ok( defined delete_glob("Symbol::Util::Test40::FOO", "SCALAR"), 'delete_glob("Symbol::Util::Test40::FOO", "SCALAR")' );
 ok( ! defined $Symbol::Util::Test40::FOO, '$Symbol::Util::Test40::FOO is ok [2]' );
 is_deeply( \@Symbol::Util::Test40::FOO, ["array"], '@Symbol::Util::Test40::FOO is ok [2]' );
 is_deeply( \%Symbol::Util::Test40::FOO, {"hash"=>1}, '%Symbol::Util::Test40::FOO is ok [2]' );
-is( Symbol::Util::Test40::FOO(), 'code', 'Symbol::Util::Test40::FOO() is ok [2]' );
+is( eval { &Symbol::Util::Test40::FOO }, 'code', '&Symbol::Util::Test40::FOO is ok [2]' );
 ok( fileno Symbol::Util::Test40::FOO, '*Symbol::Util::Test40::FOO{IO} is ok [2]' );
 
 ok( defined delete_glob("Symbol::Util::Test40::FOO", "ARRAY", "HASH"), 'delete_glob("Symbol::Util::Test40::FOO", "ARRAY", "HASH")' );
 ok( ! defined $Symbol::Util::Test40::FOO, '$Symbol::Util::Test40::FOO is ok [3]' );
 ok( ! defined @Symbol::Util::Test40::FOO, '@Symbol::Util::Test40::FOO is ok [3]' );
 ok( ! defined %Symbol::Util::Test40::FOO, '%Symbol::Util::Test40::FOO is ok [3]' );
-is( Symbol::Util::Test40::FOO(), 'code', 'Symbol::Util::Test40::FOO() is ok [3]' );
+is( eval { &Symbol::Util::Test40::FOO }, 'code', '&Symbol::Util::Test40::FOO is ok [3]' );
 ok( fileno Symbol::Util::Test40::FOO, '*Symbol::Util::Test40::FOO{IO} is ok [3]' );
 
 ok( defined delete_glob("Symbol::Util::Test40::FOO", "CODE"), 'delete_glob("Symbol::Util::Test40::FOO", "CODE")' );
 ok( ! defined $Symbol::Util::Test40::FOO, '$Symbol::Util::Test40::FOO is ok [4]' );
 ok( ! defined @Symbol::Util::Test40::FOO, '@Symbol::Util::Test40::FOO is ok [4]' );
 ok( ! defined %Symbol::Util::Test40::FOO, '%Symbol::Util::Test40::FOO is ok [4]' );
-ok( ! eval { Symbol::Util::Test40::FOO() }, 'Symbol::Util::Test40::FOO() is ok [4]' );
+ok( ! eval { &Symbol::Util::Test40::FOO }, '&Symbol::Util::Test40::FOO is ok [4]' );
 ok( fileno Symbol::Util::Test40::FOO, '*Symbol::Util::Test40::FOO{IO} is ok [4]' );
 
 ok( defined delete_glob("Symbol::Util::Test40::FOO", "IO"), 'delete_glob("Symbol::Util::Test40::FOO", "IO")' );
 ok( ! defined $Symbol::Util::Test40::FOO, '$Symbol::Util::Test40::FOO is ok [5]' );
 ok( ! defined @Symbol::Util::Test40::FOO, '@Symbol::Util::Test40::FOO is ok [5]' );
 ok( ! defined %Symbol::Util::Test40::FOO, '%Symbol::Util::Test40::FOO is ok [5]' );
-ok( ! eval { Symbol::Util::Test40::FOO() }, 'Symbol::Util::Test40::FOO() is ok [5]' );
+ok( ! eval { &Symbol::Util::Test40::FOO }, '&Symbol::Util::Test40::FOO is ok [5]' );
 ok( ! fileno Symbol::Util::Test40::FOO, '*Symbol::Util::Test40::FOO{IO} is ok [5]' );
 
 {
@@ -74,14 +74,14 @@ foreach my $slot (qw{ SCALAR ARRAY HASH CODE IO }) {
 is( $Symbol::Util::Test40::BAR, "scalar", '$Symbol::Util::Test40::BAR is ok [1]' );
 is_deeply( \@Symbol::Util::Test40::BAR, ["array"], '@Symbol::Util::Test40::BAR is ok [1]' );
 is_deeply( \%Symbol::Util::Test40::BAR, {"hash"=>1}, '%Symbol::Util::Test40::BAR is ok [1]' );
-is( eval { Symbol::Util::Test40::BAR() }, 'code', 'Symbol::Util::Test40::BAR() is ok [1]' );
+is( eval { &Symbol::Util::Test40::BAR }, 'code', '&Symbol::Util::Test40::BAR is ok [1]' );
 ok( fileno Symbol::Util::Test40::BAR, '*Symbol::Util::Test40::BAR{IO} is ok [1]' );
 
 ok( defined delete_glob("Symbol::Util::Test40::BAR", "IO"), 'delete_glob("Symbol::Util::Test40::BAR", "IO")' );
 is( $Symbol::Util::Test40::BAR, "scalar", '$Symbol::Util::Test40::BAR is ok [2]' );
 is_deeply( \@Symbol::Util::Test40::BAR, ["array"], '@Symbol::Util::Test40::BAR is ok [2]' );
 is_deeply( \%Symbol::Util::Test40::BAR, {"hash"=>1}, '%Symbol::Util::Test40::BAR is ok [2]' );
-is( eval { Symbol::Util::Test40::BAR() }, 'code', 'Symbol::Util::Test40::BAR() is ok [2]' );
+is( eval { &Symbol::Util::Test40::BAR }, 'code', '&Symbol::Util::Test40::BAR is ok [2]' );
 ok( ! fileno Symbol::Util::Test40::BAR, '*Symbol::Util::Test40::BAR{IO} is ok [2]' );
 
 {
@@ -91,14 +91,14 @@ ok( ! fileno Symbol::Util::Test40::BAR, '*Symbol::Util::Test40::BAR{IO} is ok [2
 ok( ! defined $Symbol::Util::Test40::BAR, '$Symbol::Util::Test40::BAR is ok [3]' );
 is_deeply( \@Symbol::Util::Test40::BAR, ["array"], '@Symbol::Util::Test40::BAR is ok [3]' );
 is_deeply( \%Symbol::Util::Test40::BAR, {"hash"=>1}, '%Symbol::Util::Test40::BAR is ok [3]' );
-is( eval { Symbol::Util::Test40::BAR() }, 'code', 'Symbol::Util::Test40::BAR() is ok [3]' );
+is( eval { &Symbol::Util::Test40::BAR }, 'code', '&Symbol::Util::Test40::BAR is ok [3]' );
 ok( ! fileno Symbol::Util::Test40::BAR, '*Symbol::Util::Test40::BAR{IO} is ok [3]' );
 
 ok( ! defined delete_glob("Symbol::Util::Test40::BAR"), 'delete_glob("Symbol::Util::Test40::BAR") [1]' );
 ok( ! defined $Symbol::Util::Test40::BAR, '$Symbol::Util::Test40::BAR is ok [4]' );
 ok( ! defined @Symbol::Util::Test40::BAR, '@Symbol::Util::Test40::BAR is ok [4]' );
 ok( ! defined %Symbol::Util::Test40::BAR, '%Symbol::Util::Test40::BAR is ok [4]' );
-ok( ! eval { Symbol::Util::Test40::BAR() }, 'Symbol::Util::Test40::BAR() is ok [4]' );
+ok( ! eval { &Symbol::Util::Test40::BAR }, '&Symbol::Util::Test40::BAR is ok [4]' );
 ok( ! fileno Symbol::Util::Test40::BAR, '*Symbol::Util::Test40::BAR{IO} is ok [4]' );
 
 ok( ! defined delete_glob("Symbol::Util::Test40::BAR"), 'delete_glob("Symbol::Util::Test40::BAR") [2]' );

@@ -455,6 +455,10 @@ sub export_package ($$@) {
             my ($neg, $tag) = ($1, $2);
             if (defined $export_tags{$tag}) {
                 unshift @names, map { "${neg}$_" } @{ $export_tags{$tag} };
+            }
+            else {
+                require Carp;
+                Carp::croak("$name is not a tag of the $package module");
             };
         }
         elsif ($name =~ /^!(.*)$/) {
