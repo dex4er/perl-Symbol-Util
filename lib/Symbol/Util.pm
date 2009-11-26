@@ -85,7 +85,7 @@ sub import {
 
     my $caller = caller();
 
-    my @EXPORT_OK = grep { /^[a-z]/ && !/^(import|unimport)$/ } keys %{ stash(__PACKAGE__) };
+    my @EXPORT_OK = grep { /^[a-z]/ && !/^(?:import|unimport)$/ } keys %{ stash(__PACKAGE__) };
     my %EXPORT_TAGS = ( all => [ @EXPORT_OK ] );
 
     return export_package($caller, $package, {
