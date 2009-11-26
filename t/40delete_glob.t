@@ -84,7 +84,10 @@ is_deeply( \%Symbol::Util::Test40::BAR, {"hash"=>1}, '%Symbol::Util::Test40::BAR
 is( eval { Symbol::Util::Test40::BAR() }, 'code', 'Symbol::Util::Test40::BAR() is ok [2]' );
 ok( ! fileno Symbol::Util::Test40::BAR, '*Symbol::Util::Test40::BAR{IO} is ok [2]' );
 
-ok( defined delete_glob("Symbol::Util::Test40::BAR", "SCALAR"), 'delete_glob("Symbol::Util::Test40::BAR", "SCALAR")' );
+{
+    package Symbol::Util::Test40;
+    Test::More::ok( defined Symbol::Util::delete_glob("BAR", "SCALAR"), 'Symbol::Util::delete_glob("BAR", "SCALAR")' );
+}
 ok( ! defined $Symbol::Util::Test40::BAR, '$Symbol::Util::Test40::BAR is ok [3]' );
 is_deeply( \@Symbol::Util::Test40::BAR, ["array"], '@Symbol::Util::Test40::BAR is ok [3]' );
 is_deeply( \%Symbol::Util::Test40::BAR, {"hash"=>1}, '%Symbol::Util::Test40::BAR is ok [3]' );

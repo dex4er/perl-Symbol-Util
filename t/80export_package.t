@@ -7,7 +7,7 @@ use Carp ();
 
 $SIG{__WARN__} = sub { local $Carp::CarpLevel = 1; Carp::confess("Warning: ", @_) };
 
-use Test::More tests => 108;
+use Test::More tests => 122;
 
 use Symbol::Util 'export_package', 'unexport_package';
 
@@ -198,6 +198,44 @@ ok( ! defined $Symbol::Util::Test80::Target8::BAZ, '$Symbol::Util::Test80::Targe
 is( eval { &Symbol::Util::Test80::Target8::BAZ }, 'BAZ', '&Symbol::Util::Test80::Target8::BAZ is ok [2]' );
 ok( ! defined eval { Symbol::Util::Test80::Target8->BAZ }, 'Symbol::Util::Test80::Target8->BAZ is ok [2]' );
 
+{
+    package Symbol::Util::Test80::Source2;
+    no warnings 'once';
+    sub FOO { "FOO" };
+    our $FOO = "FOO";
+    sub BAR { "BAR" };
+    our $BAZ = "BAZ";
+    our @BAZ = ("BAZ");
+    our %BAZ = (BAZ => 1);
+    open BAZ, __FILE__ or die $!;
+    *BAZ = sub { "BAZ" };
+    our @EXPORT = qw( FOO  BAR );
+    our @EXPORT_OK = qw ( BAZ );
+    our %EXPORT_TAGS = ( T => [ qw( BAR ) ] );
+};
+
+export_package("Symbol::Util::Test80::Target9", "Symbol::Util::Test80::Source2",
+    'FOO', ':T', 'BAZ'
+);
+pass( 'export_package("Symbol::Util::Test80::Target9", "Symbol::Util::Test80::Source2")' );
+
+is( eval { &Symbol::Util::Test80::Target9::FOO }, 'FOO', '&Symbol::Util::Test80::Target9::FOO is ok [1]' );
+is( eval { Symbol::Util::Test80::Target9->FOO }, 'FOO', 'Symbol::Util::Test80::Target9->FOO is ok [1]' );
+is( eval { &Symbol::Util::Test80::Target9::BAR }, 'BAR', '&Symbol::Util::Test80::Target9::BAR is ok [1]' );
+is( eval { Symbol::Util::Test80::Target9->BAR }, 'BAR', 'Symbol::Util::Test80::Target9->BAR is ok [1]' );
+is( eval { &Symbol::Util::Test80::Target9::BAZ }, 'BAZ', '&Symbol::Util::Test80::Target9::BAZ is ok [1]' );
+is( eval { Symbol::Util::Test80::Target9->BAZ }, 'BAZ', 'Symbol::Util::Test80::Target9->BAZ is ok [1]' );
+
+unexport_package("Symbol::Util::Test80::Target9", "Symbol::Util::Test80::Source2");
+pass( 'unexport_package("Symbol::Util::Test80::Target9", "Symbol::Util::Test80::Source2")' );
+
+is( eval { &Symbol::Util::Test80::Target9::FOO }, 'FOO', '&Symbol::Util::Test80::Target9::FOO is ok [2]' );
+ok( ! defined eval { Symbol::Util::Test80::Target9->FOO }, 'Symbol::Util::Test80::Target9->FOO is ok [2]' );
+is( eval { &Symbol::Util::Test80::Target9::BAR }, 'BAR', '&Symbol::Util::Test80::Target9::BAR is ok [2]' );
+ok( ! defined eval { Symbol::Util::Test80::Target9->BAR }, 'Symbol::Util::Test80::Target9->BAR is ok [2]' );
+is( eval { &Symbol::Util::Test80::Target9::BAZ }, 'BAZ', '&Symbol::Util::Test80::Target9::BAZ is ok [2]' );
+ok( ! defined eval { Symbol::Util::Test80::Target9->BAZ }, 'Symbol::Util::Test80::Target9->BAZ is ok [2]' );
+
 
 # exported element have to be in EXPORT or EXPORT_OK
 eval {
@@ -214,3 +252,4 @@ eval {
     }, ':T');
 };
 like( $@, qr/^FOO is not exported/, 'export_package("Symbol::Util::Test80::Target0", "Symbol::Util::Test80::Source1")' );
+
