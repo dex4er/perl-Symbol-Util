@@ -177,7 +177,7 @@ Returns a list of slot names for glob with specified name which have defined
 value.  If the glob is undefined, the C<undef> value is returned.  If the glob
 is defined and has no defined slots, the empty list is returned.
 
-The C<SCALAR> slot is used only if it constains defined value.
+The C<SCALAR> slot is used only if it contains defined value.
 
   print join ",", list_glob_slots("foo");
 
@@ -209,7 +209,7 @@ sub list_glob_slots ($) {
 
 =item export_glob( I<target>, I<name> : Str, I<slots> : Array ) : Ref
 
-Exports a glob I<name> to the I<target> package.  Optionaly exports only
+Exports a glob I<name> to the I<target> package.  Optionally exports only
 specified slots of the glob.
 
   sub my_function { ... };
