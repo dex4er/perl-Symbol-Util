@@ -6,23 +6,46 @@ SYNOPSIS
 
       my $caller = caller;
       *{ fetch_glob("${caller}::foo") } = sub { "this is foo" };
+      my $coderef = fetch_glob("${caller}::bar", "CODE");
+      sub baz { 42; }
+      export_glob($caller, "baz");
 
-      print join "\n", keys %{ Symbol::stash("main") };
+      print join "\n", keys %{ stash("main") };
 
       delete_glob("${caller}::foo", "CODE");
+
+      use constant PI => 3.14159265;
+      delete_sub "PI";   # remove constant from public API
+
+      require YAML;
+      export_package(__PACKAGE__, "YAML", "Dump");   # import YAML::Dump
+      unexport_package(__PACKAGE, "YAML");   # remove imported symbols
+
+      no Symbol::Util;   # clean all symbols imported from Symbol::Util
 
 DESCRIPTION
     This module provides a set of additional functions useful for Perl
     symbols manipulation.
 
-    I.e. `delete_glob' function allows to delete specific slot of symbol
-    name without deleting others.
+    `stash' and `fetch_glob' functions gets stash or glob without need to
+    use `no strict 'refs''.
+
+    `delete_glob' function allows to delete specific slot of symbol name
+    without deleting others.
+
+    `delete_sub' removes the symbol from class API. This symbol won't be
+    available as an object method.
+
+    `export_package' works like Exporter module and allows to export symbols
+    from one package to other.
+
+    `unexport_package' allows to delete previously exported symbols.
 
 AUTHOR
-    Piotr Roszatycki <dexter@debian.org>
+    Piotr Roszatycki <dexter@cpan.org>
 
 COPYRIGHT
-    Copyright (C) 2009 by Piotr Roszatycki <dexter@debian.org>.
+    Copyright (C) 2009 by Piotr Roszatycki <dexter@cpan.org>.
 
     This program is free software; you can redistribute it and/or modify it
     under the same terms as Perl itself.

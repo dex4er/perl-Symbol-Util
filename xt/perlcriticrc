@@ -25,3 +25,6 @@ allow = vars subs refs
 
 [TestingAndDebugging::ProhibitNoWarnings]
 allow = all
+
+[TestingAndDebugging::ProhibitProlongedStrictureOverride]
+statements = 12

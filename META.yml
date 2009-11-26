@@ -1,8 +1,8 @@
 ---
 name: Symbol-Util
-version: 0.01
+version: 0.02
 author:
-  - 'Piotr Roszatycki <dexter@debian.org>'
+  - 'Piotr Roszatycki <dexter@cpan.org>'
 abstract: Additional utils for Perl symbols manipulation
 license: perl
 resources:
@@ -14,8 +14,8 @@ requires:
 provides:
   Symbol::Util:
     file: lib/Symbol/Util.pm
-    version: 0.01
-generated_by: Module::Build version 0.31
+    version: 0.02
+generated_by: Module::Build version 0.35
 meta-spec:
-  url: http://module-build.sourceforge.net/META-spec-v1.2.html
-  version: 1.2
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4

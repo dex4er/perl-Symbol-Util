@@ -14,36 +14,43 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-SHA1 aa8b4621e6805812b30d542122566e8fc347f8e6 Build.PL
-SHA1 2966bae151954975d0b0edbef394e203e7abb33a Changes
-SHA1 752168fd36cc5334ab39b27e478f4997c296ec25 LICENSE
-SHA1 b056fdf94a902e64decd08543afae471c9b6f8d8 MANIFEST
-SHA1 7d9037725a8f8c9c65eff1e091819c215f55c650 MANIFEST.SKIP
-SHA1 89ae537ca44ace75cc1db183f17610cc1eb0d1d4 META.yml
-SHA1 2c5e663f544b3a1bfa0c3e847a99b257797583be Makefile.PL
-SHA1 3559583239c5a156d6091f7d68c661abb9ee8f59 README
+SHA1 70014a1d49cb3f1c1e0c96a315e263565533b412 Build.PL
+SHA1 592c2ea833b0e0aec5a62eecd37631c1df5d0c38 Changes
+SHA1 74b1c398020b9c1e8849b7982751cb70ecc5de8d LICENSE
+SHA1 5ad50078d3c4fa68b839ceae7f4a66240d4bf81e MANIFEST
+SHA1 a1dbf257177f9f76372ac111f127bc34f4f3fb24 MANIFEST.SKIP
+SHA1 917d56893e8e112f6e9d486c7ed222815fb1fdf2 META.yml
+SHA1 feb7360a7f67feafaee3c8071aac6e264ea5ccd6 Makefile.PL
+SHA1 63472e6bd3cd3daf82613b6587792d2794a1e1a2 README
 SHA1 01bd53ec0aa49f117e2efcec0eba6a6e79dddbcd eg/delete_glob.pl
-SHA1 7955244c61f79263f5a0d7f23358364a363cd741 lib/Symbol/Util.pm
-SHA1 9703fbc5fac573a3b94a1e9b06c9f5eb1c779735 t/10use.t
-SHA1 b4a95ca22b5c819dc56f9fbfb762bfc19f571fe1 t/20fetch_glob.t
-SHA1 bda55a98e61b16331437c0263f984875ee9c6135 t/30stash.t
-SHA1 caab8f55f5e83b73a0a02e1a611db5f77f03719c t/40delete_glob.t
+SHA1 cc677fcc35f46bfc4b6cc72e77bdc299aa86ba7a lib/Symbol/Util.pm
+SHA1 b97b512bb745d3cfba183fb7bb602d202ab0c64a t/10use.t
+SHA1 e8a68b237414b6f66c6417c53049c9fed82566ac t/20fetch_glob.t
+SHA1 f3e33e6dff6c02eea6ff5198900733cf934fdd32 t/30stash.t
+SHA1 60e49295af476060150d0e5a945bc9bc61c4cafd t/40delete_glob.t
+SHA1 f74093b7a32ea26d53a92bab4b74a23d9e3297b6 t/50delete_sub.t
+SHA1 d9fd6e28f4caba45956f134c882c9059fdcece09 t/60list_glob_slots.t
+SHA1 6a584065dc0cbc1bacb8b45ebbc88ad6b178504e t/70export_glob.t
+SHA1 6704f8908588a50e736163d59e06b514f7845109 t/80export_package.t
 SHA1 abec3fa7149e59f9f36680c5a49dfbbebd9d6ecc t/test.pl
-SHA1 b56b358ce5eb4fd22d3e66f1cb1c5231bf0c457f xt/consistent_version_numbers.t
-SHA1 cd748ade99c6f4613a6a8b2579df4f55af6b9db8 xt/copyright.t
+SHA1 90353a99ac0f719b6f3e58029804d8556cedc2ab xt/check_changes.t
+SHA1 a56d0c02b6c992e04a77d13a6ee89504bd718572 xt/consistent_version_numbers.t
+SHA1 67bb4c141ea95809f3db2d526ce91d9e6d894756 xt/copyright.t
 SHA1 650dccfa9b6f5a98cf731c89041bea8935dbc623 xt/cover.pl
-SHA1 0cc035a7059d85dbe3345dd77ab3bfcb26747eea xt/distribution.t
-SHA1 ce95b12540d6fa64569e97e3bc58142d567a9109 xt/kwalitee.t
+SHA1 f5aac658ae1888964274e68d179413782082b7ad xt/distribution.t
+SHA1 44147122d52fef90ab3a2c65ebba4f89342174f8 xt/kwalitee.t
 SHA1 6e7f9dde7560793bcb40acc41561e07d163ad6d1 xt/minimumversion.t
-SHA1 8625d867e8834f8d88abc5b1d81ce455d8001b04 xt/perlcritic.t
-SHA1 c6767a84a229789d62b6513c50e174225a76e1da xt/perlcriticrc
+SHA1 e8daa0c73cfc304c240fad2d2c2b1b628175a89d xt/perlcritic.t
+SHA1 68635a0f2d9305949e2cfefcf8404bd222d6554a xt/perlcriticrc
 SHA1 775b3ac02805b6d703614f42608732fb43af2a41 xt/pod_coverage.t
-SHA1 de7e5d268dea91646feb893b8c2594c3435f7655 xt/pod_spell.xt
+SHA1 bef7d46eb5cbc3e67956d4e823ec199f41ab9268 xt/pod_spell.t
+SHA1 0b189c3cebce85f885ae917c8c7d85ea5332ca1c xt/pod_spellrc
 SHA1 2c579b58def8daec94f41b628ac81c256faaa2b1 xt/pod_syntax.t
+SHA1 a38994922fda6d64e2ee75198fadc464a221fea9 xt/signature.t
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.9 (GNU/Linux)
 
-iEYEARECAAYFAkmG/dkACgkQhMHHe8CxClszmQCfR9KA42//1dAH/+5Z23PepXBC
-ilIAnA2zHVnALhbxHUeofcRfMx1rW7A+
-=JXeu
+iEYEARECAAYFAksPEwcACgkQhMHHe8CxClt9QwCdHWYmZYG4OTjmQSSW/OhoXNsT
+YyYAn1Y0HrYkPTm3SUPVNknorkazWPKr
+=m/Yy
 -----END PGP SIGNATURE-----
