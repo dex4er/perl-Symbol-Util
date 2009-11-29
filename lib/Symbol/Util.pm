@@ -472,8 +472,11 @@ sub export_package ($$@) {
     };
 
     foreach my $name (keys %names) {
-        $name =~ s/^(\W)//;
-        my $type = $1 || '';  ## no critic qw(ProhibitCaptureWithoutTest)
+        my $type = '';
+        if ($name =~ s/^(\W)//) {
+            $type = $1;
+        };
+
         my @slots;
         if ($type eq '&' or $type eq '') {
             push @slots, 'CODE';
