@@ -7,7 +7,7 @@ use Carp ();
 
 $SIG{__WARN__} = sub { local $Carp::CarpLevel = 1; Carp::confess("Warning: ", @_) };
 
-use Test::More tests => 139;
+use Test::More tests => 143;
 
 use Symbol::Util 'export_package', 'unexport_package';
 
@@ -263,6 +263,23 @@ ok( ! defined $Symbol::Util::Test80::Target11::FOO, '$Symbol::Util::Test80::Targ
 ok( ! defined eval { &Symbol::Util::Test80::Target11::BAR }, '&Symbol::Util::Test80::Target11::BAR is ok [1]' );
 ok( ! defined eval { Symbol::Util::Test80::Target11->BAR }, 'Symbol::Util::Test80::Target11->BAR is ok [1]' );
 ok( ! defined $Symbol::Util::Test80::Target11::BAZ, '$Symbol::Util::Test80::Target11::BAZ is ok [1]' );
+
+
+# Check bug if $1 was previously set
+{
+    my $a = "defined";
+    $a =~ /(.*)/;
+    is( $1, "defined", '$1 is defined');
+    eval {
+        export_package("Symbol::Util::Test80::Target12", "Symbol::Util::Test80::Source1", {
+            EXPORT => [ "FOO" ],
+        });
+    };
+    is( $@, '', 'export_package("Symbol::Util::Test80::Target12", "Symbol::Util::Test80::Source1")' );
+};
+
+is( eval { &Symbol::Util::Test80::Target12::FOO }, 'FOO', '&Symbol::Util::Test80::Target12::FOO is ok [1]' );
+is( eval { Symbol::Util::Test80::Target12->FOO }, 'FOO', 'Symbol::Util::Test80::Target12->FOO is ok [1]' );
 
 
 # exported element have to be in EXPORT or EXPORT_OK

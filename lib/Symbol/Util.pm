@@ -58,7 +58,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '0.02';
+our $VERSION = '0.0201';
 
 
 # Exported symbols $EXPORTED{$target}{$package}{$name}{$slot} = 1
@@ -472,8 +472,11 @@ sub export_package ($$@) {
     };
 
     foreach my $name (keys %names) {
-        $name =~ s/^(\W)//;
-        my $type = $1 || '';  ## no critic qw(ProhibitCaptureWithoutTest)
+        my $type = '';
+        if ($name =~ s/^(\W)//) {
+            $type = $1;
+        };
+
         my @slots;
         if ($type eq '&' or $type eq '') {
             push @slots, 'CODE';

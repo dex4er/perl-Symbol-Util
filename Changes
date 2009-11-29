@@ -1,4 +1,11 @@
 ------------------------------------------------------------------------
+0.0201 | Piotr Roszatycki <dexter@cpan.org> | 2009-11-29
+
+Fixes:
+
+* Function "export_package" could fail if $1 variable was unempty.
+
+------------------------------------------------------------------------
 0.02 | Piotr Roszatycki <dexter@cpan.org> | 2009-11-27
 
 New:
