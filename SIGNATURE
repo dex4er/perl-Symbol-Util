@@ -15,21 +15,21 @@ not run its Makefile.PL or Build.PL.
 Hash: SHA1
 
 SHA1 70014a1d49cb3f1c1e0c96a315e263565533b412 Build.PL
-SHA1 5bf1370ef5353c2e65b9bbe78fa8edb8d4967c71 Changes
+SHA1 380b90b9b38bfff87141aac2d8bdb5495965af10 Changes
 SHA1 74b1c398020b9c1e8849b7982751cb70ecc5de8d LICENSE
 SHA1 5ad50078d3c4fa68b839ceae7f4a66240d4bf81e MANIFEST
 SHA1 a1dbf257177f9f76372ac111f127bc34f4f3fb24 MANIFEST.SKIP
-SHA1 e276d44697819fca4c74637a41230f03196fd607 META.yml
+SHA1 7172b441ab9d1dfe9165bf44eb64cbc23323168b META.yml
 SHA1 feb7360a7f67feafaee3c8071aac6e264ea5ccd6 Makefile.PL
 SHA1 63472e6bd3cd3daf82613b6587792d2794a1e1a2 README
 SHA1 01bd53ec0aa49f117e2efcec0eba6a6e79dddbcd eg/delete_glob.pl
-SHA1 a7bd689a15881c6d45a4f94d35cdfe2cc08b1136 lib/Symbol/Util.pm
+SHA1 80cdd1c6091591d1210abc80f050dd166f819bdf lib/Symbol/Util.pm
 SHA1 b97b512bb745d3cfba183fb7bb602d202ab0c64a t/10use.t
 SHA1 e8a68b237414b6f66c6417c53049c9fed82566ac t/20fetch_glob.t
 SHA1 f3e33e6dff6c02eea6ff5198900733cf934fdd32 t/30stash.t
 SHA1 60e49295af476060150d0e5a945bc9bc61c4cafd t/40delete_glob.t
 SHA1 f74093b7a32ea26d53a92bab4b74a23d9e3297b6 t/50delete_sub.t
-SHA1 d9fd6e28f4caba45956f134c882c9059fdcece09 t/60list_glob_slots.t
+SHA1 69e58b80300689ac1824567abaea4f79cb7d249f t/60list_glob_slots.t
 SHA1 6a584065dc0cbc1bacb8b45ebbc88ad6b178504e t/70export_glob.t
 SHA1 a7631e884b8db6cc6c2052a2ad21be731b7bdcc8 t/80export_package.t
 SHA1 abec3fa7149e59f9f36680c5a49dfbbebd9d6ecc t/test.pl
@@ -50,7 +50,7 @@ SHA1 a38994922fda6d64e2ee75198fadc464a221fea9 xt/signature.t
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.9 (GNU/Linux)
 
-iEYEARECAAYFAksSX/MACgkQhMHHe8CxClvjygCfa6RttoKgNw5cdmx36qdgFBrv
-MjgAoO8yj8Jrrf75yVlNN02m2/lKStxT
-=WqZ+
+iEYEARECAAYFAksSZFwACgkQhMHHe8CxClsqygCgtpgC4x/gqV0+Qt2L01VqPt5r
+zUIAoKJjtR9aglwhBLxUttlUcwtyjQqZ
+=+bEz
 -----END PGP SIGNATURE-----

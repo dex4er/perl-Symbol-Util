@@ -1,6 +1,6 @@
 ---
 name: Symbol-Util
-version: 0.0201
+version: 0.0202
 author:
   - 'Piotr Roszatycki <dexter@cpan.org>'
 abstract: Additional utils for Perl symbols manipulation
@@ -14,7 +14,7 @@ requires:
 provides:
   Symbol::Util:
     file: lib/Symbol/Util.pm
-    version: 0.0201
+    version: 0.0202
 generated_by: Module::Build version 0.35
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html

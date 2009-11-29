@@ -21,7 +21,10 @@ use Symbol::Util 'list_glob_slots';
     our %FOO = ("hash" => 1);
 };
 
-is_deeply( [ sort( list_glob_slots("Symbol::Util::Test60::FOO") ) ], [ qw( ARRAY CODE HASH IO SCALAR ) ], 'list_glob_slots("Symbol::Util::Test60::FOO")' );
+{
+    my @slots = list_glob_slots("Symbol::Util::Test60::FOO");
+    is_deeply( [ sort @slots ], [ qw( ARRAY CODE HASH IO SCALAR ) ], 'list_glob_slots("Symbol::Util::Test60::FOO")' );
+};
 
 {
     package Symbol::Util::Test60;
@@ -29,14 +32,21 @@ is_deeply( [ sort( list_glob_slots("Symbol::Util::Test60::FOO") ) ], [ qw( ARRAY
     *BAR = sub { "code" };
 };
 
-is_deeply( [ sort( list_glob_slots("Symbol::Util::Test60::BAR") ) ], [ qw( CODE ) ], 'list_glob_slots("Symbol::Util::Test60::BAR")' );
+{
+    my @slots = list_glob_slots("Symbol::Util::Test60::BAR");
+    is_deeply( [ sort @slots ], [ qw( CODE ) ], 'list_glob_slots("Symbol::Util::Test60::BAR")' );
+};
 
 {
     package Symbol::Util::Test60;
-    Test::More::is_deeply( [ sort( Symbol::Util::list_glob_slots("BAR") ) ], [ qw( CODE ) ], 'Symbol::Util::list_glob_slots("BAR")' );
+    my @slots = Symbol::Util::list_glob_slots("BAR");
+    Test::More::is_deeply( [ sort @slots ], [ qw( CODE ) ], 'Symbol::Util::list_glob_slots("BAR")' );
 };
 
-is_deeply( [ sort( list_glob_slots("Symbol::Util::Test60::BAZ") ) ], [ qw( ) ], 'list_glob_slots("Symbol::Util::Test60::BAZ")' );
+{
+    my @slots = list_glob_slots("Symbol::Util::Test60::BAZ");
+    is_deeply( [ sort @slots ], [ qw( ) ], 'list_glob_slots("Symbol::Util::Test60::BAZ")' );
+};
 
 {
     package Symbol::Util::Test60;
@@ -44,4 +54,7 @@ is_deeply( [ sort( list_glob_slots("Symbol::Util::Test60::BAZ") ) ], [ qw( ) ], 
     our $NULL = undef;
 };
 
-is_deeply( [ sort( list_glob_slots("Symbol::Util::Test60::NULL") ) ], [ qw( ) ], 'list_glob_slots("Symbol::Util::Test60::NULL")' );
+{
+    my @slots = list_glob_slots("Symbol::Util::Test60::NULL");
+    is_deeply( [ sort @slots ], [ qw( ) ], 'list_glob_slots("Symbol::Util::Test60::NULL")' );
+};
