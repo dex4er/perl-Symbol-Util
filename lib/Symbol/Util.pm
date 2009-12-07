@@ -41,7 +41,7 @@ variables or bare words.
 
 The Perl symbols table is directly accessible with typeglob prefix but it can
 be difficult to read and problematic if strict mode is used.  Also the access
-to stash, glob and one of a slot of glob have different syntax notation.
+to stash, glob and one of its slot have different syntax notation.
 
 C<stash> and C<fetch_glob> functions gets stash or glob without need to use
 C<no strict 'refs'>.
