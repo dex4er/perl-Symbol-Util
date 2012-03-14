@@ -628,11 +628,11 @@ L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Symbol-Util>
 
 Piotr Roszatycki <dexter@cpan.org>
 
-=head1 COPYRIGHT
+=head1 LICENSE
 
-Copyright (C) 2009 by Piotr Roszatycki <dexter@cpan.org>.
+Copyright (c) 2009, 2010 Piotr Roszatycki <dexter@cpan.org>.
 
-This program is free software; you can redistribute it and/or modify it
-under the same terms as Perl itself.
+This is free software; you can redistribute it and/or modify it under
+the same terms as perl itself.
 
-See L<http://www.perl.com/perl/misc/Artistic.html>
+See L<http://dev.perl.org/licenses/artistic.html>
