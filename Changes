@@ -3,6 +3,8 @@
 
 Fixes:
 
+* Compiles cleanly with Perl 5.14: defined(%hash) and defined(@array) are
+  deprecated.  Fixes: RT#75763.
 * Mixor changes in POD.
 
 ------------------------------------------------------------------------
