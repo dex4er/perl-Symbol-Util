@@ -1,0 +1,258 @@
+NAME
+    Symbol::Util - Additional utils for Perl symbols manipulation
+
+SYNOPSIS
+      use Symbol::Util ':all';
+
+      my $caller = caller;
+      *{ fetch_glob("${caller}::foo") } = sub { "this is foo" };
+      my $coderef = fetch_glob("${caller}::bar", "CODE");
+      sub baz { 42; }
+      export_glob($caller, "baz");
+
+      print join "\n", keys %{ stash("main") };
+
+      delete_glob("${caller}::foo", "CODE");
+
+      use constant PI => 3.14159265;
+      delete_sub "PI";   # remove constant from public API
+
+      require YAML;
+      export_package(__PACKAGE__, "YAML", "Dump");   # import YAML::Dump
+      unexport_package(__PACKAGE, "YAML");   # remove imported symbols
+
+      no Symbol::Util;   # clean all symbols imported from Symbol::Util
+
+DESCRIPTION
+    This module provides a set of additional functions useful for Perl
+    symbols manipulation.
+
+    All Perl symbols from the same package are organized as a stash. Each
+    symbol (glob) contains one or more of following slots: "SCALAR",
+    "ARRAY", "HASH", "CODE", "IO", "FORMAT". These slots are also accessible
+    as standard variables or bare words.
+
+    The Perl symbols table is directly accessible with typeglob prefix but
+    it can be difficult to read and problematic if strict mode is used. Also
+    the access to stash, glob and one of its slot have different syntax
+    notation.
+
+    "stash" and "fetch_glob" functions gets stash or glob without need to
+    use "no strict 'refs'".
+
+    "delete_glob" function allows to delete specific slot of symbol name
+    without deleting others.
+
+    "delete_sub" removes the symbol from class API. This symbol won't be
+    available as an object method.
+
+    "export_glob" function exports a glob to the target package.
+
+    "export_package" works like Exporter module and allows to export symbols
+    from one package to other.
+
+    "unexport_package" allows to delete previously exported symbols.
+
+USAGE
+    By default, the class does not export its symbols.
+
+    use Symbol::Util ':all';
+        Imports all available symbols.
+
+    no Symbol::Util;
+        Deletes all imported symbols from caller name space.
+
+FUNCTIONS
+    stash( *name* : Str ) : HashRef
+        Returns a reference to the stash for the specified name. If the
+        stash does not already exist then it will be created. The name of
+        the stash does not include the "::" at the end. It is safe to use
+        this function with "use strict 'refs'".
+
+          print join "\n", keys %{ stash("main") };
+
+    fetch_glob( *name* : Str ) : GlobRef
+    fetch_glob( *name* : Str, *slot* : Str ) : Ref
+        Returns a reference to the glob for the specified symbol name. If
+        the symbol does not already exist then it will be created. If the
+        symbol name is unqualified then it will be looked up in the calling
+        package. It is safe to use this function with "use strict 'refs'".
+
+        If the *slot* argument is defined and this slot contains defined
+        value, reference to this value is returned. The *slot* argument can
+        be one of the following strings: "SCALAR", "ARRAY", "HASH", "CODE",
+        "IO", "FORMAT").
+
+          my $caller = caller;
+          *{ fetch_glob("${caller}::foo") } = sub { "this is foo" };
+          my $coderef = fetch_glob("${caller}::foo", "CODE");
+
+    list_glob_slots( *name* ) : Maybe[Array]
+        Returns a list of slot names for glob with specified *name* which
+        contain defined value. If the glob is undefined, the "undef" value
+        is returned. If the glob is defined and has no defined slots, the
+        empty list is returned.
+
+        The "SCALAR" slot is used only if it contains defined value.
+
+          my $foo = 42;
+          my @foo = (1, 2);
+          sub foo { 1; };
+          print join ",", list_glob_slots("foo");   # SCALAR,ARRAY,CODE
+
+    export_glob( *target*, *name* : Str ) : GlobRef
+    export_glob( *target*, *name* : Str, *slots* : Array ) : Ref
+        Exports a glob *name* to the *target* package. Optionally exports
+        only specified slots of the glob.
+
+          sub my_function { ... };
+          sub import {
+              my $caller = caller;
+              export_glob($caller, "my_function");
+          }
+
+    delete_glob( *name* : Str, *slots* : Array[Str] ) : Maybe[GlobRef]
+        Deletes the specified symbol name if *slots* are not specified, or
+        deletes the specified slots in the symbol name (could be one or more
+        of the following strings: "SCALAR", "ARRAY", "HASH", "CODE", "IO",
+        "FORMAT").
+
+        Function returns the glob reference if there are any slots defined.
+
+          our $FOO = 1;
+          sub FOO { "bar" };
+
+          delete_glob("FOO", "CODE");
+
+          print $FOO;  # prints "1"
+          FOO();       # error: sub not found
+
+    delete_sub( *name* : Str ) : Maybe[GlobRef]
+        Deletes (or hides) the specified subroutine name from class API. It
+        means that this subroutine will be no longer available as a class
+        method. The purpose of this function is the same as namespace::clean
+        pragma has: it cleans a package's namespace from unwanted
+        subroutines. Function doesn't delete other slots than "CODE" slot of
+        the glob.
+
+        Function returns the glob reference if there are any other slots
+        still defined than <CODE> slot.
+
+          package My::Class;
+
+          use constant PI => 3.14159265;
+
+          use Symbol::Util 'delete_sub';
+          delete_sub "PI";   # remove constant from public API
+          no Symbol::Util;   # remove also Symbol::Util::* from public API
+
+          sub area {
+              my ($self, $r) = @_;
+              return PI * $r ** 2;
+          }
+
+          print My::Class->area(2);   # prints 12.5663706
+          print My::Class->PI;        # Can't locate object method
+
+    export_package( *target* : Str, *package* : Str, *names* : Array[Str] )
+    : Bool
+    export_package( *target* : Str, *package* : Str, *spec* : HashRef,
+    *names* : Array[Str] ) : Bool
+        Exports symbols from *package* to *target*. If *spec* is defined as
+        hash reference, it contains the specification for exporter.
+        Otherwise the standard global variables of *package* are used
+        (@EXPORT, @EXPORT_OK and %EXPORT_TAGS) to build the specification
+        for exporter. The optional list of *names* defines an import list.
+
+        The *spec* is a reference to hash with following keys:
+
+        EXPORT
+            Contains the list of default imports. It is the same as @EXPORT
+            variable.
+
+        OK  Contains the list of allowed imports. It is the same as
+            @EXPORT_OK variable.
+
+        TAGS
+            Contains the hash with tags. It is the same as %EXPORT_TAGS
+            variable.
+
+        See Exporter documentation for explanation of these global variables
+        and list of *names*.
+
+        The "export_package" function can export symbols from an external
+        package to an external package. This function can also be used as a
+        helper in "import" method.
+
+          package My::Package;
+          sub myfunc { };
+          sub import {
+              my ($package, @names) = @_;
+              my $caller = caller();
+              return export_package($caller, $package, {
+                  OK => [ qw( myfunc ) ],
+              }, @names);
+          };
+
+        All exported symbols are tracked and later can be removed with
+        "unexport_package" function.
+
+        The function returns true value if there were no errors.
+
+    unexport_package( *target* : Str, *package* : Str ) : Bool
+        Deletes symbols previously exported from *package* to *target* with
+        "export_package" function. If the symbol was "CODE" reference it is
+        deleted with "delete_sub" function. Otherwise it is deleted with
+        "delete_glob" function with proper slot as an argument.
+
+        Deleting with "delete_sub" function means that this symbol is not
+        available via class API as an object method.
+
+          require YAML;
+          export_package(__PACKAGE__, "YAML", "Dump");
+          unexport_package(__PACKAGE__, "YAML");
+          print Dump @INC;     # OK
+          __PACKAGE__->Dump;   # Can't locate object method
+
+        This function can be used as a helper in "unimport" method.
+
+          package My::Package;
+          sub unimport {
+              my ($package, @names) = @_;
+              my $caller = caller();
+              return unexport_package($caller, $package);
+          };
+
+          package main;
+          use My::Package qw(something);
+          no My::Package;
+          main->something;   # Can't locate object method
+
+        The function returns true value if there were no errors.
+
+SEE ALSO
+    Symbol, Sub::Delete, namespace::clean, Exporter.
+
+BUGS
+    "fetch_glob" returns "undef" value if "SCALAR" slot contains "undef"
+    value.
+
+    "delete_glob" and "delete_sub" delete "SCALAR" slot if it exists and
+    contains "undef" value.
+
+    "delete_glob" and "delete_sub" always delete "FORMAT" slot.
+
+    If you find the bug or want to implement new features, please report it
+    at <http://rt.cpan.org/NoAuth/Bugs.html?Dist=Symbol-Util>
+
+AUTHOR
+    Piotr Roszatycki <dexter@cpan.org>
+
+LICENSE
+    Copyright (c) 2009, 2012 Piotr Roszatycki <dexter@cpan.org>.
+
+    This is free software; you can redistribute it and/or modify it under
+    the same terms as perl itself.
+
+    See <http://dev.perl.org/licenses/artistic.html>
+
