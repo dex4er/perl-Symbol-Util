@@ -76,9 +76,6 @@ our $VERSION = '0.0203';
 my %EXPORTED;
 
 
-## no critic qw(ProhibitSubroutinePrototypes)
-## no critic qw(RequireArgUnpacking)
-
 =head1 USAGE
 
 By default, the class does not export its symbols.
@@ -140,7 +137,7 @@ C<use strict 'refs'>.
 
 sub stash ($) {
     no strict 'refs';
-    return \%{ *{ $_[0] . '::' } };
+    return *{ $_[0] . '::' }{HASH};
 };
 
 
@@ -423,15 +420,15 @@ The function returns true value if there were no errors.
 =cut
 
 sub export_package ($$@) {
-    my $target = shift;
-    my $package = shift;
-    my $spec = ref $_[0] eq 'HASH' ? shift : {
+    my ($target, $package, @args) = @_;
+
+    my $spec = ref $args[0] eq 'HASH' ? shift @args : {
         EXPORT => fetch_glob("${package}::EXPORT", "ARRAY"),
         OK     => fetch_glob("${package}::EXPORT_OK", "ARRAY"),
         TAGS   => fetch_glob("${package}::EXPORT_TAGS", "HASH"),
     };
 
-    my @names = @_;
+    my @names = @args;
 
     # support: use Package 3.14 qw();
     return 1 if @names == 1 and $names[0] eq '';
