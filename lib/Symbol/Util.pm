@@ -34,6 +34,15 @@ Symbol::Util - Additional utils for Perl symbols manipulation
 This module provides a set of additional functions useful for Perl
 symbols manipulation.
 
+All Perl symbols from the same package are organized as a stash.  Each symbol
+(glob) contains one or more of following slots: C<SCALAR>, C<ARRAY>, C<HASH>,
+C<CODE>, C<IO>, C<FORMAT>.  These slots are also accessible as standard
+variables or bare words.
+
+The Perl symbols table is directly accessible with typeglob prefix but it can
+be difficult to read and problematic if strict mode is used.  Also the access
+to stash, glob and one of its slot have different syntax notation.
+
 C<stash> and C<fetch_glob> functions gets stash or glob without need to use
 C<no strict 'refs'>.
 
@@ -42,6 +51,8 @@ symbol name without deleting others.
 
 C<delete_sub> removes the symbol from class API.  This symbol won't be
 available as an object method.
+
+C<export_glob> function exports a glob to the target package.
 
 C<export_package> works like L<Exporter> module and allows to export symbols
 from one package to other.
@@ -58,17 +69,14 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '0.0202';
+our $VERSION = '0.0203';
 
 
 # Exported symbols $EXPORTED{$target}{$package}{$name}{$slot} = 1
 my %EXPORTED;
 
 
-## no critic qw(ProhibitSubroutinePrototypes)
-## no critic qw(RequireArgUnpacking)
-
-=head1 IMPORTS
+=head1 USAGE
 
 By default, the class does not export its symbols.
 
@@ -118,19 +126,18 @@ sub unimport {
 
 =item stash( I<name> : Str ) : HashRef
 
-Returns a refernce to the stash for the specified name.  If the stash does not
-already exists it will be created.  The name of the stash does not include the
-C<::> at the end.  It is safe to use this function with C<use strict 'refs'>.
+Returns a reference to the stash for the specified name.  If the stash does
+not already exist then it will be created.  The name of the stash does not
+include the C<::> at the end.  It is safe to use this function with
+C<use strict 'refs'>.
 
-This function is taken from Kurila, a dialect of Perl.
-
-  print join "\n", keys %{ Symbol::stash("main") };
+  print join "\n", keys %{ stash("main") };
 
 =cut
 
 sub stash ($) {
     no strict 'refs';
-    return \%{ *{ $_[0] . '::' } };
+    return *{ $_[0] . '::' }{HASH};
 };
 
 
@@ -138,16 +145,14 @@ sub stash ($) {
 
 =item fetch_glob( I<name> : Str, I<slot> : Str ) : Ref
 
-Returns a reference to the glob for the specified symbol name.  If the
-symbol does not already exists it will be created.  If the symbol name is
-unqualified it will be looked up in the calling package.  It is safe to use
-this function with C<use strict 'refs'>.
+Returns a reference to the glob for the specified symbol name.  If the symbol
+does not already exist then it will be created.  If the symbol name is
+unqualified then it will be looked up in the calling package.  It is safe to
+use this function with C<use strict 'refs'>.
 
-If I<slot> argument is defined and this slot has defined value, reference to
-its value is returned.  The I<slot> argument can be one of the following
-strings: C<SCALAR>, C<ARRAY>, C<HASH>, C<CODE>, C<IO>, C<FORMAT>).
-
-This function is taken from Kurila, a dialect of Perl.
+If the I<slot> argument is defined and this slot contains defined value,
+reference to this value is returned.  The I<slot> argument can be one of the
+following strings: C<SCALAR>, C<ARRAY>, C<HASH>, C<CODE>, C<IO>, C<FORMAT>).
 
   my $caller = caller;
   *{ fetch_glob("${caller}::foo") } = sub { "this is foo" };
@@ -173,13 +178,16 @@ sub fetch_glob ($;$) {
 
 =item list_glob_slots( I<name> ) : Maybe[Array]
 
-Returns a list of slot names for glob with specified name which have defined
-value.  If the glob is undefined, the C<undef> value is returned.  If the glob
-is defined and has no defined slots, the empty list is returned.
+Returns a list of slot names for glob with specified I<name> which contain
+defined value.  If the glob is undefined, the C<undef> value is returned.  If
+the glob is defined and has no defined slots, the empty list is returned.
 
 The C<SCALAR> slot is used only if it contains defined value.
 
-  print join ",", list_glob_slots("foo");
+  my $foo = 42;
+  my @foo = (1, 2);
+  sub foo { 1; };
+  print join ",", list_glob_slots("foo");   # SCALAR,ARRAY,CODE
 
 =cut
 
@@ -302,8 +310,10 @@ sub delete_glob ($;@) {
 =item delete_sub( I<name> : Str ) : Maybe[GlobRef]
 
 Deletes (or hides) the specified subroutine name from class API.  It means
-that this subroutine will be no longer available as the class method.  The
-purpose of this function is the same as L<namespace::clean> pragma has.
+that this subroutine will be no longer available as a class method.  The
+purpose of this function is the same as L<namespace::clean> pragma has: it
+cleans a package's namespace from unwanted subroutines.  Function doesn't
+delete other slots than C<CODE> slot of the glob.
 
 Function returns the glob reference if there are any other slots still defined
 than <CODE> slot.
@@ -318,11 +328,11 @@ than <CODE> slot.
 
   sub area {
       my ($self, $r) = @_;
-      return PI * $r ** 2
+      return PI * $r ** 2;
   }
 
   print My::Class->area(2);   # prints 12.5663706
-  print My::Class->PI;        # can't locate object method
+  print My::Class->PI;        # Can't locate object method
 
 =cut
 
@@ -410,15 +420,15 @@ The function returns true value if there were no errors.
 =cut
 
 sub export_package ($$@) {
-    my $target = shift;
-    my $package = shift;
-    my $spec = ref $_[0] eq 'HASH' ? shift : {
+    my ($target, $package, @args) = @_;
+
+    my $spec = ref $args[0] eq 'HASH' ? shift @args : {
         EXPORT => fetch_glob("${package}::EXPORT", "ARRAY"),
         OK     => fetch_glob("${package}::EXPORT_OK", "ARRAY"),
         TAGS   => fetch_glob("${package}::EXPORT_TAGS", "HASH"),
     };
 
-    my @names = @_;
+    my @names = @args;
 
     # support: use Package 3.14 qw();
     return 1 if @names == 1 and $names[0] eq '';
@@ -508,7 +518,7 @@ sub export_package ($$@) {
 };
 
 
-=item unexport_package( I<target>, I<package> ) : Bool
+=item unexport_package( I<target> : Str, I<package> : Str ) : Bool
 
 Deletes symbols previously exported from I<package> to I<target> with
 C<export_package> function.  If the symbol was C<CODE> reference it is deleted
@@ -519,8 +529,10 @@ Deleting with C<delete_sub> function means that this symbol is not available
 via class API as an object method.
 
   require YAML;
-  export_package(__PACKAGE__, "YAML", "dump");
+  export_package(__PACKAGE__, "YAML", "Dump");
   unexport_package(__PACKAGE__, "YAML");
+  print Dump @INC;     # OK
+  __PACKAGE__->Dump;   # Can't locate object method
 
 This function can be used as a helper in C<unimport> method.
 
@@ -599,10 +611,10 @@ L<Symbol>, L<Sub::Delete>, L<namespace::clean>, L<Exporter>.
 
 C<fetch_glob> returns C<undef> value if C<SCALAR> slot contains C<undef> value.
 
-C<delete_glob> deletes C<SCALAR> slot if it exists and contains C<undef>
-value.
+C<delete_glob> and C<delete_sub> delete C<SCALAR> slot if it exists and
+contains C<undef> value.
 
-C<delete_glob> always deletes C<FORMAT> slot.
+C<delete_glob> and C<delete_sub> always delete C<FORMAT> slot.
 
 If you find the bug or want to implement new features, please report it at
 L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Symbol-Util>
@@ -613,11 +625,11 @@ L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Symbol-Util>
 
 Piotr Roszatycki <dexter@cpan.org>
 
-=head1 COPYRIGHT
+=head1 LICENSE
 
-Copyright (C) 2009 by Piotr Roszatycki <dexter@cpan.org>.
+Copyright (c) 2009, 2012 Piotr Roszatycki <dexter@cpan.org>.
 
-This program is free software; you can redistribute it and/or modify it
-under the same terms as Perl itself.
+This is free software; you can redistribute it and/or modify it under
+the same terms as perl itself.
 
-See L<http://www.perl.com/perl/misc/Artistic.html>
+See L<http://dev.perl.org/licenses/artistic.html>

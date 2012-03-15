@@ -39,22 +39,22 @@ ok( fileno Symbol::Util::Test40::FOO, '*Symbol::Util::Test40::FOO{IO} is ok [2]'
 
 ok( defined delete_glob("Symbol::Util::Test40::FOO", "ARRAY", "HASH"), 'delete_glob("Symbol::Util::Test40::FOO", "ARRAY", "HASH")' );
 ok( ! defined $Symbol::Util::Test40::FOO, '$Symbol::Util::Test40::FOO is ok [3]' );
-ok( ! defined @Symbol::Util::Test40::FOO, '@Symbol::Util::Test40::FOO is ok [3]' );
-ok( ! defined %Symbol::Util::Test40::FOO, '%Symbol::Util::Test40::FOO is ok [3]' );
+ok( ! @Symbol::Util::Test40::FOO, '@Symbol::Util::Test40::FOO is ok [3]' );
+ok( ! %Symbol::Util::Test40::FOO, '%Symbol::Util::Test40::FOO is ok [3]' );
 is( eval { &Symbol::Util::Test40::FOO }, 'code', '&Symbol::Util::Test40::FOO is ok [3]' );
 ok( fileno Symbol::Util::Test40::FOO, '*Symbol::Util::Test40::FOO{IO} is ok [3]' );
 
 ok( defined delete_glob("Symbol::Util::Test40::FOO", "CODE"), 'delete_glob("Symbol::Util::Test40::FOO", "CODE")' );
 ok( ! defined $Symbol::Util::Test40::FOO, '$Symbol::Util::Test40::FOO is ok [4]' );
-ok( ! defined @Symbol::Util::Test40::FOO, '@Symbol::Util::Test40::FOO is ok [4]' );
-ok( ! defined %Symbol::Util::Test40::FOO, '%Symbol::Util::Test40::FOO is ok [4]' );
+ok( ! @Symbol::Util::Test40::FOO, '@Symbol::Util::Test40::FOO is ok [4]' );
+ok( ! %Symbol::Util::Test40::FOO, '%Symbol::Util::Test40::FOO is ok [4]' );
 ok( ! eval { &Symbol::Util::Test40::FOO }, '&Symbol::Util::Test40::FOO is ok [4]' );
 ok( fileno Symbol::Util::Test40::FOO, '*Symbol::Util::Test40::FOO{IO} is ok [4]' );
 
 ok( defined delete_glob("Symbol::Util::Test40::FOO", "IO"), 'delete_glob("Symbol::Util::Test40::FOO", "IO")' );
 ok( ! defined $Symbol::Util::Test40::FOO, '$Symbol::Util::Test40::FOO is ok [5]' );
-ok( ! defined @Symbol::Util::Test40::FOO, '@Symbol::Util::Test40::FOO is ok [5]' );
-ok( ! defined %Symbol::Util::Test40::FOO, '%Symbol::Util::Test40::FOO is ok [5]' );
+ok( ! @Symbol::Util::Test40::FOO, '@Symbol::Util::Test40::FOO is ok [5]' );
+ok( ! %Symbol::Util::Test40::FOO, '%Symbol::Util::Test40::FOO is ok [5]' );
 ok( ! eval { &Symbol::Util::Test40::FOO }, '&Symbol::Util::Test40::FOO is ok [5]' );
 ok( ! fileno Symbol::Util::Test40::FOO, '*Symbol::Util::Test40::FOO{IO} is ok [5]' );
 
@@ -96,8 +96,8 @@ ok( ! fileno Symbol::Util::Test40::BAR, '*Symbol::Util::Test40::BAR{IO} is ok [3
 
 ok( ! defined delete_glob("Symbol::Util::Test40::BAR"), 'delete_glob("Symbol::Util::Test40::BAR") [1]' );
 ok( ! defined $Symbol::Util::Test40::BAR, '$Symbol::Util::Test40::BAR is ok [4]' );
-ok( ! defined @Symbol::Util::Test40::BAR, '@Symbol::Util::Test40::BAR is ok [4]' );
-ok( ! defined %Symbol::Util::Test40::BAR, '%Symbol::Util::Test40::BAR is ok [4]' );
+ok( ! @Symbol::Util::Test40::BAR, '@Symbol::Util::Test40::BAR is ok [4]' );
+ok( ! %Symbol::Util::Test40::BAR, '%Symbol::Util::Test40::BAR is ok [4]' );
 ok( ! eval { &Symbol::Util::Test40::BAR }, '&Symbol::Util::Test40::BAR is ok [4]' );
 ok( ! fileno Symbol::Util::Test40::BAR, '*Symbol::Util::Test40::BAR{IO} is ok [4]' );
 

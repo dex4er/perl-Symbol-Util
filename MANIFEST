@@ -1,12 +1,9 @@
 Build.PL
 Changes
-eg/delete_glob.pl
+examples/delete_glob.pl
 lib/Symbol/Util.pm
-LICENSE
-Makefile.PL
-MANIFEST
+MANIFEST			This list of files
 MANIFEST.SKIP
-META.yml
 README
 t/10use.t
 t/20fetch_glob.t
@@ -31,5 +28,9 @@ xt/pod_spell.t
 xt/pod_spellrc
 xt/pod_syntax.t
 xt/signature.t
+Makefile.PL
+LICENSE
+META.yml
+META.json
 SIGNATURE    Added here by Module::Build
 SIGNATURE    Added here by Module::Build

@@ -27,6 +27,16 @@ DESCRIPTION
     This module provides a set of additional functions useful for Perl
     symbols manipulation.
 
+    All Perl symbols from the same package are organized as a stash. Each
+    symbol (glob) contains one or more of following slots: `SCALAR',
+    `ARRAY', `HASH', `CODE', `IO', `FORMAT'. These slots are also accessible
+    as standard variables or bare words.
+
+    The Perl symbols table is directly accessible with typeglob prefix but
+    it can be difficult to read and problematic if strict mode is used. Also
+    the access to stash, glob and one of its slot have different syntax
+    notation.
+
     `stash' and `fetch_glob' functions gets stash or glob without need to
     use `no strict 'refs''.
 
@@ -36,6 +46,8 @@ DESCRIPTION
     `delete_sub' removes the symbol from class API. This symbol won't be
     available as an object method.
 
+    `export_glob' function exports a glob to the target package.
+
     `export_package' works like Exporter module and allows to export symbols
     from one package to other.
 
@@ -44,11 +56,11 @@ DESCRIPTION
 AUTHOR
     Piotr Roszatycki <dexter@cpan.org>
 
-COPYRIGHT
-    Copyright (C) 2009 by Piotr Roszatycki <dexter@cpan.org>.
+LICENSE
+    Copyright (c) 2009, 2012 Piotr Roszatycki <dexter@cpan.org>.
 
-    This program is free software; you can redistribute it and/or modify it
-    under the same terms as Perl itself.
+    This is free software; you can redistribute it and/or modify it under
+    the same terms as perl itself.
 
-    See http://www.perl.com/perl/misc/Artistic.html
+    See http://dev.perl.org/licenses/artistic.html
 

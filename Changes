@@ -1,4 +1,13 @@
 ------------------------------------------------------------------------
+0.0203 | Piotr Roszatycki <dexter@cpan.org> | 2012-03-14
+
+Fixes:
+
+* Compiles cleanly with Perl 5.14: defined(%hash) and defined(@array) are
+  deprecated.  Fixes: RT#75763.
+* Mixor changes in POD.
+
+------------------------------------------------------------------------
 0.0202 | Piotr Roszatycki <dexter@cpan.org> | 2009-11-29
 
 Fixes:

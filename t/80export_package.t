@@ -210,8 +210,8 @@ ok( defined *Symbol::Util::Test80::Target9::BAZ{IO}, '*Symbol::Util::Test80::Tar
 unexport_package("Symbol::Util::Test80::Target9", "Symbol::Util::Test80::Source1");
 pass( 'unexport_package("Symbol::Util::Test80::Target9", "Symbol::Util::Test80::Source1")' );
 
-ok( ! defined @Symbol::Util::Test80::Target9::BAZ, '@Symbol::Util::Test80::Target9::BAZ is ok [2]' );
-ok( ! defined %Symbol::Util::Test80::Target9::BAZ, '%Symbol::Util::Test80::Target9::BAZ is ok [2]' );
+ok( ! @Symbol::Util::Test80::Target9::BAZ, '@Symbol::Util::Test80::Target9::BAZ is ok [2]' );
+ok( ! %Symbol::Util::Test80::Target9::BAZ, '%Symbol::Util::Test80::Target9::BAZ is ok [2]' );
 ok( ! defined *Symbol::Util::Test80::Target9::BAZ{IO}, '*Symbol::Util::Test80::Target9::BAZ{IO} is ok [2]' );
 
 {
